@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Bonds Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease-in-out;
+            max-width: 500px;
+            width: 90%;
+        }
+        .btn {
+            display: inline-block;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+        }
+        .btn-secondary {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #059669;
+        }
+        .input-field {
+            border: 2px solid #d1d5db;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        .question-text {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            letter-spacing: 2px;
+        }
+        .feedback {
+            height: 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .feedback-correct {
+            color: #10b981;
+        }
+        .feedback-incorrect {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="container mx-auto p-4 text-center">
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="card mx-auto">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Number Bonds Challenge</h1>
+            <p class="text-gray-600 mb-8">Select a number to practice your bonds and get 10 correct in a row!</p>
+            <div class="mb-8">
+                <label for="number-select" class="block text-lg font-medium text-gray-700 mb-2">Practice bonds to:</label>
+                <select id="number-select" class="w-full max-w-xs mx-auto p-3 border-2 border-gray-300 rounded-xl text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <!-- Options will be populated by JS -->
+                </select>
+            </div>
+            <button id="start-btn" class="btn btn-primary w-full max-w-xs mx-auto text-lg">Start Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="card mx-auto hidden">
+            <div class="flex justify-between items-center mb-6 text-lg">
+                <div class="font-semibold text-gray-700">Streak: <span id="streak-counter" class="font-bold text-indigo-600 text-xl">0</span>/10</div>
+                <div class="font-semibold text-gray-700">Time: <span id="timer" class="font-bold text-indigo-600 text-xl">00:00</span></div>
+            </div>
+            <div id="question-container" class="my-8 min-h-[60px] flex items-center justify-center">
+                <p id="question-text" class="question-text"></p>
+            </div>
+            <div class="mb-4">
+                <input type="number" id="answer-input" class="input-field" placeholder="?">
+            </div>
+             <div id="feedback-message" class="feedback mb-4 text-lg"></div>
+            <button id="check-btn" class="btn btn-primary w-full max-w-xs mx-auto text-lg">Check Answer</button>
+        </div>
+
+        <!-- Success Screen -->
+        <div id="success-screen" class="card mx-auto hidden">
+            <h2 class="text-3xl md:text-4xl font-bold text-green-500 mb-4">🎉 Well Done! 🎉</h2>
+            <p class="text-gray-700 text-xl mb-2">You got 10 in a row correct!</p>
+            <p class="text-gray-700 text-xl mb-6">Your time was: <span id="final-time" class="font-bold text-indigo-600"></span></p>
+            <button id="play-again-btn" class="btn btn-secondary w-full max-w-xs mx-auto text-lg">Play Again</button>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const settingsScreen = document.getElementById('settings-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const successScreen = document.getElementById('success-screen');
+
+        const numberSelect = document.getElementById('number-select');
+        const startBtn = document.getElementById('start-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        const streakCounter = document.getElementById('streak-counter');
+        const timerDisplay = document.getElementById('timer');
+        const questionText = document.getElementById('question-text');
+        const answerInput = document.getElementById('answer-input');
+        const feedbackMessage = document.getElementById('feedback-message');
+        const finalTimeDisplay = document.getElementById('final-time');
+
+        // Game State
+        let targetNumber = 10;
+        let currentAnswer = 0;
+        let correctStreak = 0;
+        let timerInterval;
+        let secondsElapsed = 0;
+
+        // --- Initialization ---
+        function initialize() {
+            // Populate the select dropdown
+            for (let i = 10; i <= 100; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                numberSelect.appendChild(option);
+            }
+            
+            // Event Listeners
+            startBtn.addEventListener('click', startGame);
+            checkBtn.addEventListener('click', checkAnswer);
+            playAgainBtn.addEventListener('click', resetGame);
+            answerInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+        }
+
+        // --- Game Flow ---
+        function startGame() {
+            targetNumber = parseInt(numberSelect.value);
+            settingsScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            
+            correctStreak = 0;
+            secondsElapsed = 0;
+            updateStreakDisplay();
+            startTimer();
+            generateQuestion();
+        }
+
+        function resetGame() {
+            successScreen.classList.add('hidden');
+            settingsScreen.classList.remove('hidden');
+            gameScreen.classList.add('hidden');
+            clearInterval(timerInterval);
+            timerDisplay.textContent = "00:00";
+            feedbackMessage.textContent = '';
+        }
+
+        function showSuccess() {
+            clearInterval(timerInterval);
+            gameScreen.classList.add('hidden');
+            successScreen.classList.remove('hidden');
+            finalTimeDisplay.textContent = formatTime(secondsElapsed);
+        }
+
+        // --- Question Logic ---
+        function generateQuestion() {
+            answerInput.value = '';
+            answerInput.focus();
+            feedbackMessage.textContent = '';
+            feedbackMessage.className = 'feedback mb-4 text-lg';
+
+            const num1 = Math.floor(Math.random() * (targetNumber + 1));
+            const num2 = targetNumber - num1;
+
+            const questionTypes = [
+                { format: `${num1} + <span class="text-indigo-600">___</span> = ${targetNumber}`, answer: num2 },
+                { format: `<span class="text-indigo-600">___</span> + ${num2} = ${targetNumber}`, answer: num1 },
+                { format: `${targetNumber} - ${num1} = <span class="text-indigo-600">___</span>`, answer: num2 },
+                { format: `${targetNumber} - <span class="text-indigo-600">___</span> = ${num2}`, answer: num1 }
+            ];
+            
+            // Ensure we don't get negative answers in the third format if targetNumber is the same as num1
+            if (targetNumber === num1 && num2 === 0) {
+                 questionTypes.splice(2,1);
+            }
+
+            const selectedQuestion = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+            
+            questionText.innerHTML = selectedQuestion.format;
+            currentAnswer = selectedQuestion.answer;
+        }
+        
+        // --- Answer Checking ---
+        function checkAnswer() {
+            const userAnswer = parseInt(answerInput.value);
+
+            if (isNaN(userAnswer)) {
+                feedbackMessage.textContent = "Please enter a number.";
+                feedbackMessage.className = 'feedback mb-4 text-lg feedback-incorrect';
+                return;
+            }
+
+            if (userAnswer === currentAnswer) {
+                handleCorrectAnswer();
+            } else {
+                handleIncorrectAnswer();
+            }
+        }
+
+        function handleCorrectAnswer() {
+            correctStreak++;
+            updateStreakDisplay();
+            feedbackMessage.textContent = "Correct!";
+            feedbackMessage.className = 'feedback mb-4 text-lg feedback-correct';
+
+            if (correctStreak >= 10) {
+                setTimeout(showSuccess, 500);
+            } else {
+                setTimeout(generateQuestion, 500);
+            }
+        }
+
+        function handleIncorrectAnswer() {
+            correctStreak = 0;
+            updateStreakDisplay();
+            feedbackMessage.textContent = `Not quite! The answer was ${currentAnswer}. Try this one.`;
+            feedbackMessage.className = 'feedback mb-4 text-lg feedback-incorrect';
+            answerInput.value = '';
+            answerInput.focus();
+            // We generate a new question on incorrect answer to avoid frustration
+            setTimeout(generateQuestion, 2000);
+        }
+
+
+        // --- UI Updates & Helpers ---
+        function updateStreakDisplay() {
+            streakCounter.textContent = correctStreak;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                timerDisplay.textContent = formatTime(secondsElapsed);
+            }, 1000);
+        }
+
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+            const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${minutes}:${seconds}`;
+        }
+
+        // --- Start the app ---
+        initialize();
+    </script>
+</body>
+</html>
