@@ -1,0 +1,677 @@
+/* progressStyles.css - Additional styles for progress tracking */
+
+/* Progress Button */
+.progress-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.progress-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+/* Progress Modal */
+.progress-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2008; /* Below confetti (9999) but above everything else */
+}
+
+.progress-modal.hidden {
+    display: none;
+}
+
+.progress-modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2009;
+}
+
+/* Modal Header */
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.progress-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Tabs */
+.progress-tabs {
+    display: flex;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 20px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 15px 20px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: #4b5563;
+}
+
+.tab-btn.active {
+    color: #667eea;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Tab Content */
+.progress-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px;
+}
+
+.tab-content {
+    display: none;
+    position: relative;
+    overflow: visible;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 5px;
+}
+
+.card-label {
+    font-size: 14px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Recent Activity */
+.recent-activity {
+    background: #f9fafb;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.recent-activity h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #374151;
+}
+
+.session-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #e5e7eb;
+}
+
+.session-date {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.session-drill {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.session-time {
+    text-align: right;
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* Chart Container */
+.chart-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #e5e7eb;
+    height: 400px;
+    position: relative;
+    overflow: hidden; /* Prevent canvas from escaping */
+}
+
+.chart-container canvas {
+    max-height: 100%;
+}
+
+/* Drill Selector */
+.drill-selector {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.drill-selector label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.drill-selector select {
+    flex: 1;
+    max-width: 300px;
+    padding: 10px 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.drill-selector select:hover,
+.drill-selector select:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+/* Drill Stats */
+.drill-stats {
+    margin-top: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+/* History Table */
+.history-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.history-table {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+#history-table {
+    width: 100%;
+	border-collapse: collapse;
+}
+
+#history-table thead {
+   background: #f9fafb;
+}
+
+#history-table th,
+#history-table td {
+   padding: 12px;
+   text-align: left;
+   border-bottom: 1px solid #e5e7eb;
+}
+
+#history-table th {
+   font-weight: 600;
+   color: #374151;
+   text-transform: uppercase;
+   font-size: 12px;
+   letter-spacing: 0.5px;
+}
+
+#history-table tbody tr:hover {
+   background: #f9fafb;
+}
+
+#history-table tbody tr.best-time {
+   background: #fef3c7;
+}
+
+#history-table tbody tr.best-time td {
+   font-weight: 600;
+}
+
+/* Progress Actions */
+.progress-actions {
+   display: flex;
+   gap: 10px;
+   padding: 20px 30px;
+   border-top: 1px solid #e5e7eb;
+   background: #f9fafb;
+   justify-content: center;
+   flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+   display: inline-flex;
+   align-items: center;
+   gap: 8px;
+   padding: 10px 20px;
+   border-radius: 8px;
+   font-weight: 600;
+   cursor: pointer;
+   border: none;
+   transition: all 0.3s ease;
+}
+
+.btn-primary {
+   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   color: white;
+}
+
+.btn-primary:hover {
+   transform: translateY(-2px);
+   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+   background: #e5e7eb;
+   color: #374151;
+}
+
+.btn-secondary:hover {
+   background: #d1d5db;
+}
+
+.btn-danger {
+   background: #ef4444;
+   color: white;
+}
+
+.btn-danger:hover {
+   background: #dc2626;
+}
+
+/* Share Dialog */
+.share-dialog {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background: rgba(0, 0, 0, 0.5);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 3000;
+   animation: fadeIn 0.3s ease;
+}
+
+.share-dialog-content {
+   background: white;
+   border-radius: 15px;
+   padding: 30px;
+   max-width: 400px;
+   width: 90%;
+   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+   animation: slideUp 0.3s ease;
+}
+
+.share-dialog-content h3 {
+   margin-top: 0;
+   margin-bottom: 20px;
+   color: #1f2937;
+}
+
+.share-options {
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+   margin-bottom: 20px;
+}
+
+.share-option {
+   padding: 15px;
+   background: #f9fafb;
+   border: 1px solid #e5e7eb;
+   border-radius: 8px;
+   font-weight: 600;
+   color: #374151;
+   cursor: pointer;
+   transition: all 0.3s ease;
+   text-align: left;
+}
+
+.share-option:hover {
+   background: #667eea;
+   color: white;
+   border-color: #667eea;
+}
+
+.close-dialog {
+   width: 100%;
+   padding: 10px;
+   background: #e5e7eb;
+   border: none;
+   border-radius: 8px;
+   font-weight: 600;
+   color: #374151;
+   cursor: pointer;
+   transition: background 0.3s ease;
+}
+
+.close-dialog:hover {
+   background: #d1d5db;
+}
+
+/* Animations */
+@keyframes fadeIn {
+   from {
+       opacity: 0;
+   }
+   to {
+       opacity: 1;
+   }
+}
+
+@keyframes slideUp {
+   from {
+       transform: translateY(20px);
+       opacity: 0;
+   }
+   to {
+       transform: translateY(0);
+       opacity: 1;
+   }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+   .progress-modal-content {
+       width: 100%;
+       height: 100%;
+       max-height: 100vh;
+       border-radius: 0;
+   }
+   
+   .progress-tabs {
+       overflow-x: auto;
+       white-space: nowrap;
+       padding: 0 10px;
+   }
+   
+   .tab-btn {
+       padding: 12px 15px;
+       font-size: 14px;
+   }
+   
+   .progress-content {
+       padding: 20px;
+   }
+   
+   .summary-cards {
+       grid-template-columns: repeat(2, 1fr);
+       gap: 15px;
+   }
+   
+   .session-item {
+       grid-template-columns: 1fr;
+       gap: 5px;
+   }
+   
+   .session-date,
+   .session-drill,
+   .session-time {
+       text-align: left;
+   }
+   
+   .chart-container {
+       height: 300px;
+       padding: 15px;
+   }
+   
+   .progress-actions {
+       flex-direction: column;
+       padding: 15px;
+   }
+   
+   .btn {
+       width: 100%;
+       justify-content: center;
+   }
+   
+   .progress-btn {
+       bottom: 10px;
+       right: 10px;
+       padding: 10px 20px;
+       font-size: 14px;
+   }
+   
+   .progress-btn span {
+       display: none;
+   }
+      
+   .history-controls {
+       flex-direction: column;
+   }
+   
+   .history-controls .btn {
+       width: 100%;
+   }
+}
+
+/* Tooltip Support */
+.tooltip {
+   position: relative;
+   display: inline-block;
+}
+
+.tooltip .tooltiptext {
+   visibility: hidden;
+   width: 200px;
+   background-color: #1f2937;
+   color: white;
+   text-align: center;
+   border-radius: 8px;
+   padding: 8px 12px;
+   position: absolute;
+   z-index: 1;
+   bottom: 125%;
+   left: 50%;
+   margin-left: -100px;
+   opacity: 0;
+   transition: opacity 0.3s;
+   font-size: 14px;
+}
+
+.tooltip .tooltiptext::after {
+   content: "";
+   position: absolute;
+   top: 100%;
+   left: 50%;
+   margin-left: -5px;
+   border-width: 5px;
+   border-style: solid;
+   border-color: #1f2937 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+   visibility: visible;
+   opacity: 1;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+   display: inline-block;
+   width: 40px;
+   height: 40px;
+   margin: 20px auto;
+   border: 4px solid #f3f3f3;
+   border-top: 4px solid #667eea;
+   border-radius: 50%;
+   animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+   0% { transform: rotate(0deg); }
+   100% { transform: rotate(360deg); }
+}
+
+/* Print Styles */
+@media print {
+   .progress-modal {
+       position: static;
+       background: none;
+   }
+   
+   .progress-modal-content {
+       box-shadow: none;
+       max-width: 100%;
+   }
+   
+   .progress-header,
+   .progress-tabs,
+   .progress-actions,
+   .close-btn,
+   .drill-selector,
+   .history-controls {
+       display: none;
+   }
+   
+   .tab-content {
+       display: block !important;
+       page-break-inside: avoid;
+   }
+   
+   .chart-container {
+       height: auto;
+       page-break-inside: avoid;
+   }
+}
+#progress-chart {
+    position: relative !important; /* Not absolute or fixed */
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 360px !important; /* Slightly less than container to account for padding */
+    z-index: 1; /* Keep it at base level within container */
+}
