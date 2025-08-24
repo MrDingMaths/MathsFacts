@@ -777,6 +777,22 @@ class UI {
 
     clearFeedback() { this.elements.feedbackMessage.textContent = ''; }
 
+    showInputFeedback(isCorrect) {
+        const inputs = this.elements.questionText.querySelectorAll('input');
+        
+        // Remove any existing feedback classes
+        inputs.forEach(input => input.classList.remove('correct', 'incorrect'));
+        
+        // Add appropriate feedback class
+        const feedbackClass = isCorrect ? 'correct' : 'incorrect';
+        inputs.forEach(input => input.classList.add(feedbackClass));
+    }
+
+    clearInputFeedback() {
+        const inputs = this.elements.questionText.querySelectorAll('input');
+        inputs.forEach(input => input.classList.remove('correct', 'incorrect'));
+    }
+
     getAnswerFromUI(levelKey) {
         if (levelKey === 'fdpConversions' || levelKey === 'fdpConversionsMultiples') {
             const answer = {};
@@ -971,6 +987,7 @@ class GameController {
         this.isChecking = false;
         this.answerSubmitted = false; // Add this line
         this.setupEventListeners();
+        this.setupArrowKeyNavigation();
         this.initializeQuestionGenerators();
         this.ui.renderLevelGrid(CONFIG.LEVEL_GROUPS, (level) => this.startGame(level));
 		setTimeout(() => this.initializeProgressTracking(), 100);
@@ -1020,6 +1037,41 @@ class GameController {
                 this.checkAnswer();
             }
         });
+        // Add global ESC key handler (store reference to avoid context issues)
+        this.handleEscKey = (e) => {
+            if (e.key === 'Escape') {
+                // Only quit if we're in the game screen
+                if (!this.ui.elements.gameScreen.classList.contains('hidden')) {
+                    this.quitGame();
+                }
+            }
+        };
+        document.addEventListener('keydown', this.handleEscKey);
+    }
+
+    setupArrowKeyNavigation() {
+        this.ui.elements.questionText.addEventListener('keydown', (e) => {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                const inputs = Array.from(this.ui.elements.questionText.querySelectorAll('input'));
+                if (inputs.length <= 1) return; // No navigation needed for single input
+                
+                const currentInput = document.activeElement;
+                const currentIndex = inputs.indexOf(currentInput);
+                
+                if (currentIndex === -1) return; // Current element is not an input
+                
+                e.preventDefault(); // Prevent default arrow key behavior (changing numbers)
+                
+                let nextIndex;
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    nextIndex = currentIndex > 0 ? currentIndex - 1 : inputs.length - 1;
+                } else { // ArrowRight or ArrowDown
+                    nextIndex = currentIndex < inputs.length - 1 ? currentIndex + 1 : 0;
+                }
+                
+                inputs[nextIndex].focus();
+            }
+        });
     }
 
     startGame(level) {
@@ -1032,6 +1084,7 @@ class GameController {
 
     generateQuestion() {
         this.ui.clearFeedback();
+        this.ui.clearInputFeedback(); // Add this line
         this.answerSubmitted = false;
         const levelKey = this.state.currentLevel.key;
         
@@ -1082,6 +1135,7 @@ class GameController {
         if (isCorrect) {
             const newStreak = this.state.incrementStreak();
             this.ui.updateStreak(newStreak);
+            this.ui.showInputFeedback(isCorrect);
             this.ui.showFeedback(true, CONFIG.POSITIVE_FEEDBACK[Math.floor(Math.random() * CONFIG.POSITIVE_FEEDBACK.length)]);
             this.confetti.trigger(CONFIG.CONFETTI.CORRECT);
             
@@ -1097,6 +1151,7 @@ class GameController {
         } else {
             this.state.resetStreak();
             this.ui.updateStreak(0);
+            this.ui.showInputFeedback(isCorrect);
             const correctAnswerText = this.ui.formatAnswerForDisplay(correctAnswer, this.state.currentLevel.key);
 			const needsKatex = typeof correctAnswer === 'object' || this.state.currentLevel.key.includes('fdp');
 			this.ui.showFeedback(false, `${correctAnswerText}`, needsKatex);

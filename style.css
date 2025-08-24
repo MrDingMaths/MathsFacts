@@ -193,3 +193,39 @@ body {
 .feedback .katex {
     font-size: 2rem !important;
 }
+/* Input field feedback states */
+.inline-input {
+    transition: all 0.3s ease-in-out;
+}
+
+.inline-input.correct {
+    border-bottom-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.08);
+}
+
+.inline-input.incorrect {
+    border-bottom-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+/* Fraction input feedback */
+.fraction-container .inline-input.correct {
+    border-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.08);
+}
+
+.fraction-container .inline-input.incorrect {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+/* FDP table input feedback */
+.fdp-table .inline-input.correct {
+    border-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.08);
+}
+
+.fdp-table .inline-input.incorrect {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+}
