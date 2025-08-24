@@ -43,13 +43,13 @@ class ProgressUI {
         modal.innerHTML = `
             <div class="progress-modal-content">
                 <div class="progress-header">
-                    <h2>Progress Tracking</h2>
+                    <h2>Progress</h2>
                     <button class="close-btn" id="close-progress">×</button>
                 </div>
                 
                 <div class="progress-tabs">
                     <button class="tab-btn active" data-view="overview">Overview</button>
-                    <button class="tab-btn" data-view="drills">Drill Progress</button>
+                    <button class="tab-btn" data-view="drills">Improvement</button>
                     <button class="tab-btn" data-view="history">History</button>
                 </div>
                 
@@ -125,13 +125,13 @@ class ProgressUI {
                 
                 <div class="progress-actions">
                     <button id="print-report" class="btn btn-secondary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                         </svg>
                         Print Report
                     </button>
                     <button id="download-chart" class="btn btn-secondary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
                         Download Chart

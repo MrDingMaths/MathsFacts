@@ -168,13 +168,11 @@ body {
     font-size: clamp(1rem, 3vw, 1.25rem);
 }
 .fdp-table th, .fdp-table td {
-    border: 1px solid #e5e7eb;
     padding: 0.75rem;
     vertical-align: middle;
     text-align: center;
 }
 .fdp-table th {
-    background-color: #f9fafb;
     font-weight: 600;
     color: #374151;
 }

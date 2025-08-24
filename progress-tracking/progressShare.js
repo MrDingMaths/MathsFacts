@@ -21,7 +21,7 @@ class ProgressShare {
                 
                 if (drill.improvements.length > 0) {
                     const totalImprovement = drill.improvements.reduce((sum, i) => sum + parseFloat(i.percentImprovement), 0);
-                    text += `🚀 Total Improvement: ${totalImprovement.toFixed(1)}%\n`;
+                    text += `📈 Total Improvement: ${totalImprovement.toFixed(1)}%\n`;
                 }
             }
         } else {
@@ -30,7 +30,7 @@ class ProgressShare {
             text += `⏱️ Total Time Spent: ${this.formatTime(summary.totalTimeSpent)}\n`;
             text += `📈 Drills Improved: ${summary.drillsWithImprovement}\n`;
             if (summary.averageImprovement > 0) {
-                text += `🚀 Average Improvement: ${summary.averageImprovement}%\n`;
+                text += `📈 Average Improvement: ${summary.averageImprovement}%\n`;
             }
         }
         
@@ -126,7 +126,7 @@ class ProgressShare {
                     </div>
                     <div class="summary-card">
                         <h3>Average Improvement</h3>
-                        <div class="value">🚀${summary.averageImprovement || 0}%</div>
+                        <div class="value">📈${summary.averageImprovement || 0}%</div>
                     </div>
                 </div>
                 

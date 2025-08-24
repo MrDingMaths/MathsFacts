@@ -777,10 +777,6 @@ class UI {
 
     clearFeedback() { this.elements.feedbackMessage.textContent = ''; }
 
-    disableInput() {
-        this.elements.questionText.querySelectorAll('input').forEach(input => input.disabled = true);
-    }
-
     getAnswerFromUI(levelKey) {
         if (levelKey === 'fdpConversions' || levelKey === 'fdpConversionsMultiples') {
             const answer = {};
@@ -973,7 +969,7 @@ class GameController {
         this.questionGen = new QuestionGenerator();
         this.confetti = new Confetti('confetti-canvas');
         this.isChecking = false;
-
+        this.answerSubmitted = false; // Add this line
         this.setupEventListeners();
         this.initializeQuestionGenerators();
         this.ui.renderLevelGrid(CONFIG.LEVEL_GROUPS, (level) => this.startGame(level));
@@ -1036,6 +1032,7 @@ class GameController {
 
     generateQuestion() {
         this.ui.clearFeedback();
+        this.answerSubmitted = false;
         const levelKey = this.state.currentLevel.key;
         
         let generatorFn = this.generatorMap[levelKey];
@@ -1055,9 +1052,9 @@ class GameController {
     }
     
     checkAnswer() {
-        if (this.isChecking) return;
+        if (this.isChecking || this.answerSubmitted) return;
+        this.answerSubmitted = true;
         this.isChecking = true;
-        this.ui.disableInput();
 
         const userAnswer = this.ui.getAnswerFromUI(this.state.currentLevel.key);
         const correctAnswer = this.state.currentAnswer;
@@ -1091,7 +1088,11 @@ class GameController {
             if (this.state.isComplete()) {
                 setTimeout(() => this.showSuccess(), 500);
             } else {
-                setTimeout(() => { this.generateQuestion(); this.isChecking = false; }, CONFIG.FEEDBACK_DELAY_CORRECT);
+            setTimeout(() => { 
+                    this.answerSubmitted = false; // Reset flag
+                    this.generateQuestion(); 
+                    this.isChecking = false; 
+                }, CONFIG.FEEDBACK_DELAY_CORRECT);
             }
         } else {
             this.state.resetStreak();
@@ -1099,7 +1100,11 @@ class GameController {
             const correctAnswerText = this.ui.formatAnswerForDisplay(correctAnswer, this.state.currentLevel.key);
 			const needsKatex = typeof correctAnswer === 'object' || this.state.currentLevel.key.includes('fdp');
 			this.ui.showFeedback(false, `${correctAnswerText}`, needsKatex);
-            setTimeout(() => { this.generateQuestion(); this.isChecking = false; }, CONFIG.FEEDBACK_DELAY_INCORRECT);
+            setTimeout(() => { 
+                this.answerSubmitted = false; // Reset flag
+                this.generateQuestion(); 
+                this.isChecking = false; 
+            }, CONFIG.FEEDBACK_DELAY_INCORRECT);
         }
     }
 
