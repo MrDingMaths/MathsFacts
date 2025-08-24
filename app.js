@@ -37,7 +37,7 @@ const CONFIG = {
             { key: 'squares', name: 'Perfect Squares' },
             { key: 'unitConversions', name: 'Unit Conversions' },
         ],
-        "Fractions, Decimals, Percentages": [
+        "Fractions Decimals Percentages": [
             { key: 'hcf', name: 'HCF' },
             { key: 'lcm', name: 'LCM' },
             { key: 'equivFractions', name: 'Equivalent Fractions' },
