@@ -444,7 +444,7 @@ class QuestionGenerator {
             return { format: `${num} \\div ${power} = ${this.inputPlaceholder}`, answer: parseFloat((num / power).toPrecision(15)) };
         }
     }
-generateUnitConversions() {
+    generateUnitConversions() {
         const UNITS = {
             length: [
                 { name: 'mm', multiplier: 0.001 }, { name: 'cm', multiplier: 0.01 },
@@ -487,11 +487,36 @@ generateUnitConversions() {
             unit1 = unitList[index1];
             unit2 = unitList[index2];
 
+            // Prevent problematic time conversions (s to hr, ms to hr, ms to min)
+            if (categoryKey === 'time') {
+                const problematicPairs = [
+                    ['s', 'hr'],   // seconds to hours
+                    ['hr', 's'],   // hours to seconds  
+                    ['ms', 'hr'],  // milliseconds to hours
+                    ['hr', 'ms'],  // hours to milliseconds
+                    ['ms', 'min'], // milliseconds to minutes
+                    ['min', 'ms']  // minutes to milliseconds
+                ];
+                
+                const currentPair = [unit1.name, unit2.name];
+                const isProblematic = problematicPairs.some(pair => 
+                    (pair[0] === currentPair[0] && pair[1] === currentPair[1]) ||
+                    (pair[0] === currentPair[1] && pair[1] === currentPair[0])
+                );
+                
+                if (isProblematic) {
+                    // Set dummy values to continue the loop
+                    num1 = -1;
+                    num2 = -1;
+                    continue; // Skip this iteration and try again
+                }
+            }
+    
             const conversionFactor = unit1.multiplier / unit2.multiplier;
             
-            // Special handling for time to avoid recurring decimals
+            // Generate numbers with maximum 4 significant figures
             if (categoryKey === 'time') {
-                // Generate easier numbers for time conversions
+                // Keep existing time logic for clean conversions
                 if (conversionFactor < 1) { // e.g., converting seconds to minutes
                     const base = 1 / conversionFactor; // This would be 60
                     const easyMultiples = [1, 2, 3, 4, 5, 10, 12, 15, 30, 45];
@@ -502,9 +527,18 @@ generateUnitConversions() {
                     num1 = easyInputs[Math.floor(Math.random() * easyInputs.length)];
                 }
             } else {
-                const decimalPlaces = Math.floor(Math.random() * 4); // 0 to 3
-                const randomBase = (Math.random() * 150) + 1;
-                num1 = parseFloat(randomBase.toFixed(decimalPlaces));
+                // Generate a random number with exactly 1-4 significant figures
+                const sigFigs = Math.floor(Math.random() * 4) + 1; // 1, 2, 3, or 4 sig figs
+                
+                // Generate base number between 1-9.999...
+                const baseNum = 1 + Math.random() * 9;
+                
+                // Choose a power of 10 (can be negative for small numbers)
+                const power = Math.floor(Math.random() * 7) - 3; // Range: -3 to +3
+                
+                // Create the number and round to desired sig figs
+                const rawNum = baseNum * Math.pow(10, power);
+                num1 = parseFloat(rawNum.toPrecision(sigFigs));
             }
             
             num2 = num1 * conversionFactor;
@@ -515,8 +549,8 @@ generateUnitConversions() {
         );
         
         // Use toPrecision to avoid floating point representation errors
-        const cleanNum1 = parseFloat(num1.toPrecision(15));
-        const cleanNum2 = parseFloat(num2.toPrecision(15));
+        const cleanNum1 = parseFloat(num1.toPrecision(10));
+        const cleanNum2 = parseFloat(num2.toPrecision(10));
 
         // Randomly decide which number is the question and which is the answer
         if (Math.random() < 0.5) {
