@@ -323,7 +323,7 @@ class QuestionGenerator {
 		const availableQuantities = percentageData[percentage];
 		const quantity = availableQuantities[Math.floor(Math.random() * availableQuantities.length)];
 		
-		const answer = (percentage / 100) * quantity;
+		const answer = Math.round(percentage * quantity / 100);
 		
 		// Format the question using LaTeX
 		const questionFormat = `${percentage}\\% \\text{ of } ${quantity} = ${this.inputPlaceholder}`;
