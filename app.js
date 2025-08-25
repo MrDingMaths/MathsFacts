@@ -1151,6 +1151,8 @@ class GameController {
         } else {
             this.state.resetStreak();
             this.ui.updateStreak(0);
+            this.timer.reset()
+            this.timer.start()
             this.ui.showInputFeedback(isCorrect);
             const correctAnswerText = this.ui.formatAnswerForDisplay(correctAnswer, this.state.currentLevel.key);
 			const needsKatex = typeof correctAnswer === 'object' || this.state.currentLevel.key.includes('fdp');
