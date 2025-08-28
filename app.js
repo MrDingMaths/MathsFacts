@@ -1137,9 +1137,50 @@ class GameController {
         this.state.lastQuestionFormat = q.format;
         this.ui.displayQuestion(q, this.state.currentLevel.key);
     }
+
+    isInputEmpty() {
+        const levelKey = this.state.currentLevel.key;
+        
+        // Check FDP conversion questions
+        if (levelKey === 'fdpConversions' || levelKey === 'fdpConversionsMultiples') {
+            const decInput = document.getElementById('input-decimal');
+            const perInput = document.getElementById('input-percentage');
+            const fracNumInput = document.getElementById('input-fraction-num');
+            const fracDenInput = document.getElementById('input-fraction-den');
+            
+            // Check if any required input field is empty
+            if (decInput && decInput.value.trim() === '') return true;
+            if (perInput && perInput.value.trim() === '') return true;
+            if (fracNumInput && fracNumInput.value.trim() === '') return true;
+            if (fracDenInput && fracDenInput.value.trim() === '') return true;
+            
+            return false;
+        }
+        
+        // Check fraction questions
+        const numInput = document.getElementById('input-fraction-num');
+        if (numInput) {
+            const denInput = document.getElementById('input-fraction-den');
+            return numInput.value.trim() === '' || denInput.value.trim() === '';
+        }
+        
+        // Check regular input questions
+        const inputs = this.ui.elements.questionText.querySelectorAll('.inline-input');
+        return Array.from(inputs).every(input => input.value.trim() === '');
+    }
     
     checkAnswer() {
         if (this.isChecking || this.answerSubmitted) return;
+        
+        // Check if input is empty before processing
+        if (this.isInputEmpty()) {
+            this.ui.showFeedback(false, "Please enter an answer");
+            setTimeout(() => {
+                this.ui.clearFeedback();
+            }, 1000);
+            return;
+        }
+        
         this.answerSubmitted = true;
         this.isChecking = true;
 
