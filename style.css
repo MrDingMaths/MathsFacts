@@ -1,0 +1,501 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6;
+}
+.card {
+    background-color: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    transition: all 0.3s ease-in-out;
+    width: 95%;
+    max-width: 700px;
+}
+.question-text {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; 
+}
+.inline-input {
+    display: inline-block;
+    width: 6rem; /* Default width */
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: #1d4ed8;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid #1d4ed8;
+    text-align: center;
+    padding: 0 0.25rem;
+    margin: 0 0.5rem;
+    line-height: 1;
+    -moz-appearance: textfield;
+}
+.inline-input::-webkit-outer-spin-button,
+.inline-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.inline-input:focus {
+    outline: none;
+    border-bottom-color: #1d4ed8;
+}
+.inline-input:disabled {
+    background-color: #f9f9ff;
+    border-bottom-color: #d1d5db;
+}
+.feedback {
+    height: 5rem;
+    font-weight: 600;
+    transition: all 0.3s;
+	font-size: 1.5rem !important;
+}
+.feedback-correct { color: #10b981; }
+.feedback-incorrect { color: #ef4444; }
+
+.level-section-title {
+    text-align: left;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #374151;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+/* Level Grid - Force consistent tile dimensions */
+.level-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+    gap: 1rem !important;
+    grid-auto-rows: 140px !important; /* Force consistent row height */
+}
+
+/* All level buttons - enforce consistent height everywhere */
+.level-btn, 
+.skill-path .level-btn, 
+#level-selection-container .level-btn,
+div[class*="level-btn"] {
+    border: 2px solid #e5e7eb !important;
+    border-radius: 1rem !important;
+    padding: 1rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease-in-out !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 140px !important; /* Fixed height for consistent 4-line tiles */
+    max-height: 140px !important;
+    min-height: 140px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+.level-btn:hover,
+.skill-path .level-btn:hover,
+#level-selection-container .level-btn:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+}
+
+/* All level titles */
+.level-title,
+.skill-path .level-title,
+#level-selection-container .level-title {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* All best time/status text - prevent wrapping completely */
+.best-time,
+.skill-path .best-time,
+#level-selection-container .best-time,
+.skill-path-time {
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    margin-top: 0.5rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 1.125rem !important; /* Fixed height for consistent layout */
+    min-height: 1.125rem !important;
+    max-height: 1.125rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    line-height: 1 !important;
+}
+
+.rating-none { background-color: #f3f4f6; color: #374151; }
+.rating-beginner { background: linear-gradient(145deg, #f8fafc, #94a3b8); color: #1e293b; border-color: #94a3b8; }
+.rating-developing { background: linear-gradient(145deg, #dcfce7, #4ade80); color: #047857; border-color: #6ee7b7; }
+.rating-expert { background: linear-gradient(145deg, #ecfdf5, #34d399); color: #065f46; border-color: #34d399; }
+.rating-mastery { background: linear-gradient(145deg, #fefbeb, #fbbf24); color: #a16207; border-color: #f59e0b; }
+.rating-true-mastery { background: linear-gradient(145deg, #fef7f0, #f9a8d4); color: #9d174d; border-color: #f472b6; }
+
+#confetti-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
+}
+
+/* Styles for HTML-based fractions */
+.fraction-container {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.5rem;
+    vertical-align: middle;
+}
+.fraction-numerator, .fraction-denominator {
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.fraction-numerator {
+    border-bottom: 3px solid #1f2937;
+}
+.fraction-container .inline-input {
+    width: 5rem; /* Smaller input for fractions */
+    margin: 0.1rem;
+    padding: 0.2rem;
+    border: 2px solid #1d4ed8;
+    border-radius: 0.3rem;
+    background-color: #f9f9ff;
+}
+
+/* Styles for the new FDP conversion table */
+.fdp-table {
+    width: 100%;
+    max-width: 550px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    font-size: clamp(1rem, 3vw, 1.25rem);
+}
+.fdp-table th, .fdp-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    text-align: center;
+}
+.fdp-table th {
+    font-weight: 600;
+    color: #1f2937;
+}
+.fdp-table td {
+    height: 90px;
+}
+.fdp-table .inline-input {
+    width: 100%;
+    max-width: 120px;
+    font-size: 1.25rem;
+}
+.percentage-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+.feedback .katex {
+    font-size: 2rem !important;
+}
+/* Input field feedback states */
+.inline-input {
+    transition: all 0.3s ease-in-out;
+}
+
+.inline-input.correct {
+    border-bottom-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.08);
+}
+
+.inline-input.incorrect {
+    border-bottom-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+/* Fraction input feedback */
+.fraction-container .inline-input.correct {
+    border-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.08);
+}
+
+.fraction-container .inline-input.incorrect {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+/* FDP table input feedback */
+.fdp-table .inline-input.correct {
+    border-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.08);
+}
+
+.fdp-table .inline-input.incorrect {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.08);
+}
+
+/* Mastery Progress Bars */
+.mastery-progress-bar {
+    width: 100%;
+    background-color: #e5e7eb;
+    border-radius: 0.75rem;
+    height: 1rem;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 0.25rem;
+}
+
+.mastery-progress-fill {
+    height: 100%;
+    border-radius: 0.75rem;
+    transition: width 0.8s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.mastery-progress-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.15rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mastery-progress-stats {
+    font-size: 0.7rem;
+    color: #6b7280;
+}
+
+/* Skill Path Styles */
+.skill-path-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 1rem 0;
+    scroll-behavior: smooth;
+}
+
+.skill-path {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 2rem;
+    min-width: fit-content;
+}
+
+/* Connecting line between nodes */
+.skill-path::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, #e5e7eb, #d1d5db, #e5e7eb);
+    border-radius: 2px;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+/* Skill Path Nodes */
+.skill-path-node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: all 0.3s ease-in-out;
+    padding: 0.5rem;
+    border-radius: 1rem;
+}
+
+.skill-path-node:hover {
+    transform: scale(1.05);
+}
+
+/* Node Circle */
+.skill-path-circle {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    border: 4px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-align: center;
+    line-height: 1.1;
+    transition: all 0.3s ease-in-out;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Node states matching existing rating system */
+.skill-path-node.rating-none .skill-path-circle {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.skill-path-node.rating-beginner .skill-path-circle {
+    background: linear-gradient(145deg, #f8fafc, #94a3b8);
+    color: #1e293b;
+    border-color: #94a3b8;
+}
+
+.skill-path-node.rating-developing .skill-path-circle {
+    background: linear-gradient(145deg, #dcfce7, #4ade80);
+    color: #047857;
+    border-color: #6ee7b7;
+}
+
+.skill-path-node.rating-expert .skill-path-circle {
+    background: linear-gradient(145deg, #ecfdf5, #34d399);
+    color: #065f46;
+    border-color: #34d399;
+}
+
+.skill-path-node.rating-mastery .skill-path-circle {
+    background: linear-gradient(145deg, #fefbeb, #fbbf24);
+    color: #a16207;
+    border-color: #f59e0b;
+}
+
+.skill-path-node.rating-true-mastery .skill-path-circle {
+    background: linear-gradient(145deg, #fef7f0, #f9a8d4);
+    color: #9d174d;
+    border-color: #f472b6;
+}
+
+/* Node Label */
+.skill-path-label {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    text-align: center;
+    max-width: 120px;
+    line-height: 1.2;
+    height: 4.8rem; /* Fixed height for 4 lines of text (4 × 1.2rem line-height) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.skill-path-time {
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* Current/Next level indicator */
+.skill-path-node.current .skill-path-circle::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 3px solid #1d4ed8;
+    border-radius: 50%;
+    animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* Section dividers in skill path */
+.skill-path-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    text-align: center;
+    margin: 0 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.skill-path-section-title {
+    background: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #4b5563;
+    border: 2px solid #e5e7eb;
+    display: inline-block;
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+    transform: rotate(-90deg);
+    transform-origin: center;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+    .skill-path {
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .skill-path-circle {
+        width: 3.5rem;
+        height: 3.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .skill-path-label {
+        font-size: 0.75rem;
+        max-width: 100px;
+        height: 4.5rem; /* Fixed height for 4 lines of mobile text (4 × 1.125rem) */
+    }
+    
+    .skill-path-section {
+        min-width: 100px;
+    }
+    
+    .skill-path-section-title {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.6rem;
+    }
+}
