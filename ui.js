@@ -15,6 +15,7 @@ export class UI {
             levelSelection: document.getElementById('level-selection-container'),
             streakCounter: document.getElementById('streak-counter'),
             timer: document.getElementById('timer'),
+            timerPausedMessage: document.getElementById('timer-paused-message'),
             questionText: document.getElementById('question-text'),
             feedbackMessage: document.getElementById('feedback-message'),
             quitBtn: document.getElementById('quit-btn'),
@@ -27,13 +28,14 @@ export class UI {
             skillPathContainer: document.getElementById('skill-path-container'),
             masteryProgressBars: document.getElementById('mastery-progress-bars'),
             toggleGridView: document.getElementById('toggle-grid-view'),
-            continueNextBtn: document.getElementById('continue-next-btn'),
             replayLevelBtn: document.getElementById('replay-level-btn'),
         };
+        this.onBackToLevels = null;
         this.questionRenderers = {
             '{{EQUIV_FRACTION_CHALLENGE}}': this._renderEquivFraction,
             '{{SIMPLIFY_FRACTION_CHALLENGE}}': this._renderSimplifyFraction,
             '{{FDP_CONVERSION_CHALLENGE}}': this._renderFDPConversion,
+            '{{UNIT_CONVERSION}}': this._renderUnitConversion,
             'default': this._renderDefaultQuestion
         };
         this.currentView = 'skill-path'; // 'skill-path' or 'grid'
@@ -43,15 +45,6 @@ export class UI {
     }
 
     setupSuccessScreenButtons() {
-        // Continue to Next Challenge button
-        if (this.elements.continueNextBtn) {
-            this.elements.continueNextBtn.addEventListener('click', () => {
-                if (this.onContinueNext) {
-                    this.onContinueNext();
-                }
-            });
-        }
-
         // Replay Level button
         if (this.elements.replayLevelBtn) {
             this.elements.replayLevelBtn.addEventListener('click', () => {
@@ -60,12 +53,42 @@ export class UI {
                 }
             });
         }
+
+        // Back to Levels button
+        if (this.elements.playAgainBtn) {
+            this.elements.playAgainBtn.addEventListener('click', () => {
+                if (this.onBackToLevels) {
+                    this.onBackToLevels();
+                }
+            });
+        }
+
+        // Keyboard shortcuts for success screen
+        this.handleSuccessScreenKey = (e) => {
+            // Only handle keys if success screen is visible
+            if (this.elements.successScreen.classList.contains('hidden')) {
+                return;
+            }
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (this.onReplayLevel) {
+                    this.onReplayLevel();
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                if (this.onBackToLevels) {
+                    this.onBackToLevels();
+                }
+            }
+        };
+        document.addEventListener('keydown', this.handleSuccessScreenKey);
     }
 
     // Set callback functions for success screen buttons
-    setSuccessScreenCallbacks(onContinueNext, onReplayLevel) {
-        this.onContinueNext = onContinueNext;
+    setSuccessScreenCallbacks(onReplayLevel, onBackToLevels) {
         this.onReplayLevel = onReplayLevel;
+        this.onBackToLevels = onBackToLevels;
     }
 
     showScreen(screenName) {
@@ -213,14 +236,14 @@ export class UI {
         const tdDecimal = createEl('td');
         const tdPercentage = createEl('td');
         const inputOptions = { type: 'number', className: 'inline-input', step: 'any', autocomplete: 'off' };
-        
+
         if (parts.givenType === 'recurring') {
             tdFraction.append(this._createFraction(null, null, true));
 
             const decimalSpan = createEl('span');
             katex.render(parts.values.decimal, decimalSpan, { throwOnError: false });
             tdDecimal.append(decimalSpan);
-            
+
             const percentageSpan = createEl('span');
             katex.render(parts.values.percentage, percentageSpan, { throwOnError: false });
             tdPercentage.append(percentageSpan);
@@ -258,26 +281,146 @@ export class UI {
                 tdPercentage.append(container);
             }
         }
-        
+
         tr.append(tdFraction, tdDecimal, tdPercentage);
         tbody.append(tr);
         table.append(tbody);
         this.elements.questionText.append(table);
     }
+
+    _renderUnitConversion(question) {
+        const frag = document.createDocumentFragment();
+
+        // Helper function to convert units to plain text with unicode powers
+        const convertUnitToPlainText = (unit) => {
+            return unit
+                .replace(/²/g, '²')  // Keep unicode superscript 2
+                .replace(/³/g, '³')  // Keep unicode superscript 3
+                .replace(/\^2/g, '²')  // Convert ^2 to unicode superscript 2
+                .replace(/\^3/g, '³')  // Convert ^3 to unicode superscript 3
+                .replace(/km²/g, 'km²')
+                .replace(/m²/g, 'm²')
+                .replace(/cm²/g, 'cm²')
+                .replace(/mm²/g, 'mm²');
+        };
+
+        // Source unit - plain text with unicode powers
+        const sourceUnitSpan = createEl('span', { style: { fontSize: '2rem', marginRight: '0.5rem' } });
+        sourceUnitSpan.textContent = convertUnitToPlainText(question.sourceUnit);
+        frag.append(sourceUnitSpan);
+
+        // Operation dropdown (multiply/divide)
+        const operationSelect = createEl('select', {
+            id: 'input-unit-operation',
+            className: 'unit-conversion-select',
+            style: { marginRight: '0.5rem', marginLeft: '0.5rem', fontSize: '1.5rem', border: '1px solid #999', borderRadius: '4px', padding: '4px', color: '#0066cc' }
+        });
+        const multiplyOption = createEl('option', { value: 'multiply', textContent: '×' });
+        const divideOption = createEl('option', { value: 'divide', textContent: '÷' });
+        operationSelect.append(multiplyOption, divideOption);
+        frag.append(operationSelect);
+
+        // Factor dropdown
+        const factorSelect = createEl('select', {
+            id: 'input-unit-factor',
+            className: 'unit-conversion-select',
+            style: { marginRight: '0.5rem', marginLeft: '0.5rem', fontSize: '1.5rem', border: '1px solid #999', borderRadius: '4px', padding: '4px', color: '#0066cc', textAlign: 'right' }
+        });
+        // Add placeholder option
+        const placeholderOption = createEl('option', { value: '', textContent: 'factor', disabled: true, selected: true });
+        factorSelect.append(placeholderOption);
+
+        question.factorOptions.forEach(factor => {
+            // Handle both objects (area) and primitives (other types)
+            let label, optionValue;
+            if (typeof factor === 'object' && factor.display) {
+                // Area conversion option with display and value
+                label = factor.display;
+                optionValue = factor.value;
+            } else {
+                // Other conversion types (time, length, mass, capacity)
+                label = typeof factor === 'string' ? factor : factor.toString();
+                optionValue = factor;
+            }
+
+            // Convert caret notation to unicode superscripts
+            label = label.replace(/\^(\d+)/g, (_, exponent) => {
+                const superscripts = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹'];
+                return exponent.split('').map(digit => superscripts[digit]).join('');
+            });
+            // Add half spaces for readability in large numbers (e.g., 10000 -> 10 000)
+            // This regex adds spaces every 3 digits from the right, but skip if it has superscripts
+            if (!label.match(/[⁰-⁹]/)) {
+                label = label.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+            const option = createEl('option', { value: optionValue, textContent: label });
+            factorSelect.append(option);
+        });
+        frag.append(factorSelect);
+
+        // Target unit - plain text with unicode powers
+        const equals = createEl('span', { style: { marginRight: '0.5rem', marginLeft: '0.5rem' } });
+        equals.textContent = '=';
+        frag.append(equals);
+
+        const targetUnitSpan = createEl('span', { style: { fontSize: '2rem' } });
+        targetUnitSpan.textContent = convertUnitToPlainText(question.targetUnit);
+        frag.append(targetUnitSpan);
+
+        this.elements.questionText.append(frag);
+
+        // Render factor options with KaTeX for mathematical notation
+        // This updates the display of factors after they're added to the DOM
+        setTimeout(() => {
+            const factorOptions = factorSelect.querySelectorAll('option');
+            factorOptions.forEach((option, index) => {
+                if (index === 0) return; // Skip placeholder
+                const value = option.value;
+                if (typeof value === 'string' && value.includes('^')) {
+                    // Create a temporary container to render KaTeX
+                    const tempContainer = document.createElement('span');
+                    katex.render(value, tempContainer, { throwOnError: false });
+                    // Store the rendered HTML for reference (though option elements don't support HTML)
+                    option.dataset.katexHtml = tempContainer.innerHTML;
+                }
+            });
+        }, 0);
+
+        // Note: Enter key handling is now done globally in gameController
+        // so that it works from anywhere on the game screen, not just dropdowns
+    }
     
     updateStreak(streak) { this.elements.streakCounter.textContent = streak; }
 
-    showFeedback(isCorrect, message, useKatex = false) {
-        this.elements.feedbackMessage.innerHTML = ''; // Use innerHTML instead of textContent
+    showFeedback(isCorrect, message, correctAnswer = null, question = null) {
+        this.elements.feedbackMessage.innerHTML = '';
         this.elements.feedbackMessage.className = `feedback text-lg ${isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`;
-        
-        if (useKatex) {
+
+        // Display correct answer on second incorrect attempt
+        if (!isCorrect && correctAnswer) {
+            const answerLine = createEl('div');
+
+            // Text label
+            const textPart = createEl('span', {
+                textContent: 'Correct answer: ',
+                className: 'font-semibold'
+            });
+            answerLine.appendChild(textPart);
+
+            // Container for KaTeX rendering
+            const answerSpan = createEl('span', { className: 'inline-block' });
+            answerLine.appendChild(answerSpan);
+
+            this.elements.feedbackMessage.appendChild(answerLine);
+
+            // Render KaTeX using the correctAnswer parameter
             try {
-                katex.render(message, this.elements.feedbackMessage, { throwOnError: false });
+                katex.render(correctAnswer, answerSpan, { throwOnError: false });
             } catch (e) {
-                this.elements.feedbackMessage.textContent = message; // Fallback to plain text
+                answerSpan.textContent = correctAnswer; // Fallback to plain text
             }
         } else {
+            // For correct or first incorrect feedback (simple text)
             this.elements.feedbackMessage.textContent = message;
         }
     }
@@ -300,7 +443,52 @@ export class UI {
         inputs.forEach(input => input.classList.remove('correct', 'incorrect'));
     }
 
+    /**
+     * Show the timer paused message
+     */
+    showTimerPausedMessage() {
+        if (this.elements.timerPausedMessage) {
+            this.elements.timerPausedMessage.classList.remove('hidden');
+        }
+    }
+
+    /**
+     * Hide the timer paused message
+     */
+    hideTimerPausedMessage() {
+        if (this.elements.timerPausedMessage) {
+            this.elements.timerPausedMessage.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Clear the answer input field(s)
+     */
+    clearAnswer() {
+        const inputs = this.elements.questionText.querySelectorAll('input');
+        inputs.forEach(input => input.value = '');
+    }
+
     getAnswerFromUI(levelKey) {
+        if (levelKey === 'unitConversions') {
+            const operationSelect = document.getElementById('input-unit-operation');
+            const factorSelect = document.getElementById('input-unit-factor');
+
+            if (operationSelect && factorSelect) {
+                // Check if factor dropdown has a valid selection (not the placeholder)
+                const factorValue = factorSelect.value;
+                if (!factorValue) {
+                    // Placeholder is still selected, return null to trigger validation error
+                    return null;
+                }
+                return {
+                    operation: operationSelect.value,
+                    factor: parseFloat(factorValue)
+                };
+            }
+            return null;
+        }
+
         if (levelKey === 'fdpConversions' || levelKey === 'fdpConversionsMultiples') {
             const answer = {};
             const decInput = document.getElementById('input-decimal');
@@ -318,7 +506,7 @@ export class UI {
             }
             return answer;
         }
-        
+
         const numInput = document.getElementById('input-fraction-num');
         if (numInput) {
             return {
@@ -337,43 +525,88 @@ export class UI {
         return input ? parseFloat(input.value) : null;
     }
 
-    showSuccess(levelName, time, rating, isNewBest, previousBest) {
+    showSuccess(levelName, time, rating, isNewBest, previousBest, levelKey, questionCount) {
         // Store debug reference for success screen display
         // Display success screen with completion details
-        
+
         this.elements.completedLevel.textContent = levelName;
         this.elements.finalTime.textContent = new Timer().formatTime(time);
         this.elements.finalRating.textContent = rating.name;
-        
+
         if (isNewBest) {
-            this.elements.bestTimeMessage.textContent = previousBest 
+            this.elements.bestTimeMessage.textContent = previousBest
                 ? `New personal best! Beat your old time of ${new Timer().formatTime(previousBest)}.`
                 : `You've set your first record!`;
         } else {
             this.elements.bestTimeMessage.textContent = `Your best time is still ${new Timer().formatTime(previousBest)}.`;
         }
-        
+
+        // Show rating improvement guidance based on THIS attempt's rating
+        try {
+            const nextTarget = RatingUtils.getNextRatingTarget(rating, levelKey, questionCount, CONFIG);
+
+            if (nextTarget) {
+                const targetTimeFormatted = new Timer().formatTime(nextTarget.targetTime);
+                this.elements.ratingExplanation.textContent =
+                    `Complete in ${targetTimeFormatted} or less for ${nextTarget.nextRating.name}.`;
+            } else if (rating.key === 'true-mastery') {
+                const threshold = 1.5;
+                const difficultyMultiplier = (levelKey && CONFIG && CONFIG.LEVEL_DIFFICULTY_MULTIPLIERS)
+                    ? (CONFIG.LEVEL_DIFFICULTY_MULTIPLIERS[levelKey] || 1.0)
+                    : 1.0;
+                const maxTime = threshold * difficultyMultiplier * questionCount;
+                const maxTimeFormatted = new Timer().formatTime(maxTime);
+                this.elements.ratingExplanation.textContent =
+                    `You completed this level in under ${maxTimeFormatted}.`;
+            }
+        } catch (error) {
+            console.error('Failed to set rating explanation:', error);
+        }
+
         // Make sure we're showing the right screen
         this.showScreen('success');
     }
 
 	formatAnswerForDisplay(answer, levelKey) {
-        if (levelKey === 'fdpConversions' || levelKey === 'fdpConversionsMultiples') {
+        if (levelKey === 'unitConversions') {
+            if (answer && typeof answer === 'object') {
+                const operationSymbol = answer.correctOperation === 'multiply' ? '×' : '÷';
+                const factorLabel = typeof answer.correctFactor === 'string' ? answer.correctFactor : answer.correctFactor.toString();
+                return `${operationSymbol} ${factorLabel}`;
+            }
+            return String(answer);
+        } else if (levelKey === 'fdpConversions' || levelKey === 'fdpConversionsMultiples') {
             let parts = [];
-            if (answer.fraction) {
-                parts.push(`\\frac{${answer.fraction.num}}{${answer.fraction.den}}`);
+
+            // Handle FDP answers - can be any combination of fraction, decimal, percentage
+            if (answer && typeof answer === 'object') {
+                // Add fraction if it exists
+                if (answer.fraction && answer.fraction.num !== undefined && answer.fraction.den !== undefined) {
+                    parts.push(`\\frac{${answer.fraction.num}}{${answer.fraction.den}}`);
+                }
+
+                // Add decimal if it exists
+                if (answer.decimal !== undefined) {
+                    parts.push(answer.decimal.toString());
+                }
+
+                // Add percentage if it exists
+                if (answer.percentage !== undefined) {
+                    parts.push(`${answer.percentage}\\%`);
+                }
+
+                // If we found any FDP components, return the formatted string
+                if (parts.length > 0) {
+                    return parts.join(', ');
+                }
             }
-            if (answer.decimal !== undefined) {
-                parts.push(answer.decimal.toString());
-            }
-            if (answer.percentage !== undefined) {
-                parts.push(`${answer.percentage}\\%`);
-            }
-            return parts.join(', ');
+
+            // Fallback for non-object answers
+            return String(answer);
         } else if (typeof answer === 'object' && answer !== null && answer.num !== undefined) {
             return `\\frac{${answer.num}}{${answer.den}}`;
         } else {
-            return answer.toString();
+            return String(answer);
         }
     }
 
@@ -486,28 +719,23 @@ export class UI {
         const bestTime = StorageManager.getBestTime(level.key);
         const rating = bestTime ? StorageManager.getRating(bestTime, level.key) : null;
         const ratingClass = rating ? `rating-${rating.key}` : 'rating-none';
-        
-        const node = createEl('div', { 
-            className: `skill-path-node ${ratingClass} ${isNext ? 'current' : ''}` 
+
+        const node = createEl('div', {
+            className: `skill-path-node ${ratingClass} ${isNext ? 'current' : ''}`
         });
         node.dataset.levelKey = level.key;
-        
-        const circle = createEl('div', { className: 'skill-path-circle' });
-        
-        // Add level number or abbreviation with KaTeX support
-        this.setLevelAbbreviation(circle, level.name);
-        
-        const label = createEl('div', { 
+
+        const label = createEl('div', {
             className: 'skill-path-label',
-            textContent: level.name 
+            textContent: level.name
         });
-        
-        const timeDisplay = createEl('div', { 
+
+        const timeDisplay = createEl('div', {
             className: 'skill-path-time',
             textContent: bestTime ? `Best: ${new Timer().formatTime(bestTime)}` : 'Not attempted'
         });
-        
-        node.append(circle, label, timeDisplay);
+
+        node.append(label, timeDisplay);
         return node;
     }
 

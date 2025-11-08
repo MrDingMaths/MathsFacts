@@ -27,11 +27,17 @@ class ProgressUI {
             </svg>
             <span>Progress</span>
         `;
-        
-        // Add to settings screen
-        const settingsScreen = document.getElementById('settings-screen');
-        if (settingsScreen) {
-            settingsScreen.appendChild(button);
+
+        // Insert before mastery-progress-section (above mastery bars)
+        const masteryProgressSection = document.getElementById('mastery-progress-section');
+        if (masteryProgressSection) {
+            masteryProgressSection.parentNode.insertBefore(button, masteryProgressSection);
+        } else {
+            // Fallback: add to settings screen if mastery-progress-section not found
+            const settingsScreen = document.getElementById('settings-screen');
+            if (settingsScreen) {
+                settingsScreen.appendChild(button);
+            }
         }
     }
 
@@ -131,7 +137,7 @@ class ProgressUI {
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- History Tab -->
                     <div id="history-content" class="tab-content">
                         <div class="history-controls">
@@ -213,7 +219,7 @@ class ProgressUI {
         
         // Data management
         document.getElementById('clear-data')?.addEventListener('click', () => this.confirmClearData());
-        
+
         // Close modal on background click
         document.getElementById('progress-modal')?.addEventListener('click', (e) => {
             if (e.target.id === 'progress-modal') {
@@ -262,7 +268,6 @@ class ProgressUI {
                     btn.addEventListener('click', (e) => this.filterByCategory(e.target.dataset.category));
                 });
             }
-            // Removed comparison case
         }, 100);
     }
 
@@ -548,6 +553,14 @@ class ProgressUI {
         const drill = this.progressTracker.getDrillProgress(levelKey);
         if (drill) {
             const rating = this.getPerformanceRating(drill.averageTime, levelKey);
+
+            // Calculate cumulative improvement percentage
+            let cumulativeImprovement = '—';
+            if (drill.firstAttemptTime && drill.bestTime && drill.firstAttemptTime > drill.bestTime) {
+                const improvement = ((drill.firstAttemptTime - drill.bestTime) / drill.firstAttemptTime * 100);
+                cumulativeImprovement = improvement.toFixed(1) + '%';
+            }
+
             const statsHtml = `
                 <div class="stats-header">
                     <h4>Performance Statistics</h4>
@@ -572,9 +585,9 @@ class ProgressUI {
                         <div class="stat-value">${drill.totalAttempts}</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-icon">📈</div>
-                        <div class="stat-label">Improvements</div>
-                        <div class="stat-value">${drill.improvements.length}</div>
+                        <div class="stat-icon">🚀</div>
+                        <div class="stat-label">Overall Progress</div>
+                        <div class="stat-value">${((drill.firstAttemptTime - drill.bestTime) / drill.firstAttemptTime * 100).toFixed(1)}% faster</div>
                     </div>
                 </div>
             `;
@@ -631,7 +644,7 @@ class ProgressUI {
     clearBestTimes() {
         const prefix = window.CONFIG?.STORAGE_PREFIX || 'mf_bestTime_v1_';
         const keys = [];
-        
+
         // Collect all localStorage keys that match the prefix
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -639,12 +652,24 @@ class ProgressUI {
                 keys.push(key);
             }
         }
-        
+
         // Remove all matching keys
         keys.forEach(key => {
             localStorage.removeItem(key);
         });
-        
+
         console.log(`Cleared ${keys.length} best time records`);
     }
+
+    // Helper function to create elements (same as ui.js)
+    _createEl(tag, options = {}) {
+        const el = document.createElement(tag);
+        if (options.className) el.className = options.className;
+        if (options.id) el.id = options.id;
+        if (options.style) Object.assign(el.style, options.style);
+        if (options.type) el.type = options.type;
+        if (options.title) el.title = options.title;
+        return el;
+    }
+
 }

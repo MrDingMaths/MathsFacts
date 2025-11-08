@@ -22,6 +22,7 @@ export class GameState {
         this.currentAnswer = 0;             // Expected answer for current question
         this.correctStreak = 0;             // Current streak of correct answers
         this.lastQuestionFormat = null;     // Format of the last generated question
+        this.consecutiveIncorrect = 0;      // Tracks consecutive incorrect attempts on current question
     }
     
     /**
@@ -45,16 +46,40 @@ export class GameState {
     /**
      * Reset the correct answer streak to zero
      */
-    resetStreak() { 
-        this.correctStreak = 0; 
+    resetStreak() {
+        this.correctStreak = 0;
     }
-    
+
+    /**
+     * Increment consecutive incorrect attempt counter
+     * @returns {number} New consecutive incorrect count
+     */
+    incrementIncorrectCount() {
+        this.consecutiveIncorrect++;
+        return this.consecutiveIncorrect;
+    }
+
+    /**
+     * Reset consecutive incorrect attempt counter to zero
+     */
+    resetIncorrectCount() {
+        this.consecutiveIncorrect = 0;
+    }
+
+    /**
+     * Check if this is the second incorrect attempt on current question
+     * @returns {boolean} True if consecutive incorrect count is 2 or more
+     */
+    isSecondIncorrectAttempt() {
+        return this.consecutiveIncorrect >= 2;
+    }
+
     /**
      * Check if the current level is complete (required streak reached)
      * @returns {boolean} True if level is complete
      */
-    isComplete() { 
-        return this.correctStreak >= CONFIG.REQUIRED_STREAK; 
+    isComplete() {
+        return this.correctStreak >= CONFIG.REQUIRED_STREAK;
     }
 }
 

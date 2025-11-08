@@ -50,6 +50,8 @@ export const CONFIG = {
     FEEDBACK_DELAY_INCORRECT: 1000,  // Longer pause to show correct answer after mistakes
     // Random positive reinforcement messages for correct answers
     POSITIVE_FEEDBACK: ["Awesome!", "Great Job!", "You got it!", "Fantastic!", "Brilliant!", "Keep it up!"],
+    // Encouraging messages for first incorrect attempt to support learning
+    SECOND_CHANCE_FEEDBACK: ["Try again", "Not quite right", "Have another go!", "Take another shot at it!"],
     /**
      * Performance rating system based on average time per question
      * Ratings progress from beginner to true mastery based on speed and accuracy

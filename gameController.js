@@ -22,6 +22,7 @@ export class GameController {
         this.masteryTracker = new MasteryTracker();
         this.isChecking = false;
         this.answerSubmitted = false;
+        this.isWaitingForKeystroke = false;  // Flag to block normal input while waiting for keystroke after second mistake
         this.setupEventListeners();
         this.setupArrowKeyNavigation();
         this.initializeQuestionGenerators();
@@ -46,8 +47,8 @@ export class GameController {
     initializeLearningPath() {
         // Set up success screen callbacks
         this.ui.setSuccessScreenCallbacks(
-            () => this.continueToNextChallenge(),
-            () => this.replayCurrentLevel()
+            () => this.replayCurrentLevel(),
+            () => this.quitGame()
         );
 
         // Initialize the learning path interface
@@ -79,11 +80,27 @@ export class GameController {
     setupEventListeners() {
         this.ui.elements.quitBtn.addEventListener('click', () => this.quitGame());
         this.ui.elements.playAgainBtn.addEventListener('click', () => this.quitGame());
-        this.ui.elements.questionText.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !this.isChecking && e.target.tagName === 'INPUT') {
-                this.checkAnswer();
+
+        // Handle Enter key on game screen - works for both text inputs and unit conversions
+        this.handleEnterKey = (e) => {
+            if (e.key === 'Enter' && !this.isChecking && !this.isWaitingForKeystroke) {
+                // Only check if we're in the game screen
+                if (!this.ui.elements.gameScreen.classList.contains('hidden')) {
+                    // For unit conversions, allow Enter from dropdowns or anywhere on game screen
+                    // For regular inputs, only allow from INPUT elements
+                    if (this.state.currentLevel && this.state.currentLevel.key === 'unitConversions') {
+                        e.preventDefault();
+                        this.checkAnswer();
+                    } else if (e.target.tagName === 'INPUT') {
+                        this.checkAnswer();
+                    }
+                }
             }
-        });
+        };
+
+        this.ui.elements.questionText.addEventListener('keydown', this.handleEnterKey);
+        document.addEventListener('keydown', this.handleEnterKey);
+
         // Add global ESC key handler (store reference to avoid context issues)
         this.handleEscKey = (e) => {
             if (e.key === 'Escape') {
@@ -125,16 +142,19 @@ export class GameController {
         this.state.setLevel(level);
         this.ui.showScreen('game');
         this.ui.updateStreak(0);
+        this.isWaitingForKeystroke = false;
         this.timer.start();
         this.generateQuestion();
     }
 
     generateQuestion() {
         this.ui.clearFeedback();
-        this.ui.clearInputFeedback(); // Add this line
+        this.ui.clearInputFeedback();
+        this.ui.hideTimerPausedMessage();  // Ensure message is hidden when generating new question
         this.answerSubmitted = false;
+        this.state.resetIncorrectCount();  // Reset mistake counter for new question
         const levelKey = this.state.currentLevel.key;
-        
+
         let generatorFn = this.generatorMap[levelKey];
         if (!generatorFn) {
             if (levelKey.startsWith('bonds') || levelKey.startsWith('mixed')) {
@@ -144,47 +164,73 @@ export class GameController {
                 return;
             }
         }
-        
+
         const q = generatorFn();
-        this.state.currentAnswer = q.answer;
+        if (!q) {
+            console.error("Failed to generate question");
+            this.quitGame();
+            return;
+        }
+
+        // For unit conversions, the answer properties are directly on the question object
+        // For other question types, the answer is nested under q.answer
+        if (this.state.currentLevel.key === 'unitConversions') {
+            this.state.currentAnswer = {
+                correctOperation: q.correctOperation,
+                correctFactor: q.correctFactor
+            };
+        } else {
+            this.state.currentAnswer = q.answer;
+        }
+
         this.state.lastQuestionFormat = q.format;
+        this.state.currentQuestion = q; // Store full question object for mistake recording
         this.ui.displayQuestion(q, this.state.currentLevel.key);
     }
 
     isInputEmpty() {
         const levelKey = this.state.currentLevel.key;
-        
+
+        // Check unit conversion questions (dropdown based, never empty)
+        if (levelKey === 'unitConversions') {
+            const operationSelect = document.getElementById('input-unit-operation');
+            const factorSelect = document.getElementById('input-unit-factor');
+            // Dropdowns always have values selected, so never empty
+            return !operationSelect || !factorSelect;
+        }
+
         // Check FDP conversion questions
         if (levelKey === 'fdpConversions' || levelKey === 'fdpConversionsMultiples') {
             const decInput = document.getElementById('input-decimal');
             const perInput = document.getElementById('input-percentage');
             const fracNumInput = document.getElementById('input-fraction-num');
             const fracDenInput = document.getElementById('input-fraction-den');
-            
+
             // Check if any required input field is empty
             if (decInput && decInput.value.trim() === '') return true;
             if (perInput && perInput.value.trim() === '') return true;
             if (fracNumInput && fracNumInput.value.trim() === '') return true;
             if (fracDenInput && fracDenInput.value.trim() === '') return true;
-            
+
             return false;
         }
-        
+
         // Check fraction questions
         const numInput = document.getElementById('input-fraction-num');
         if (numInput) {
             const denInput = document.getElementById('input-fraction-den');
             return numInput.value.trim() === '' || denInput.value.trim() === '';
         }
-        
+
         // Check regular input questions
         const inputs = this.ui.elements.questionText.querySelectorAll('.inline-input');
         return Array.from(inputs).every(input => input.value.trim() === '');
     }
     
     checkAnswer() {
+        // Guard clauses: prevent double submission and concurrent checking
         if (this.isChecking || this.answerSubmitted) return;
-        
+
         // Check if input is empty before processing
         if (this.isInputEmpty()) {
             this.ui.showFeedback(false, "Please enter an answer");
@@ -193,15 +239,34 @@ export class GameController {
             }, 1000);
             return;
         }
-        
+
         this.answerSubmitted = true;
         this.isChecking = true;
 
+        // Get and validate input
         const userAnswer = this.ui.getAnswerFromUI(this.state.currentLevel.key);
         const correctAnswer = this.state.currentAnswer;
         let isCorrect = false;
 
-        if (this.state.currentLevel.key === 'fdpConversions' || this.state.currentLevel.key === 'fdpConversionsMultiples') {
+        // Compare answers based on question type
+        if (this.state.currentLevel.key === 'unitConversions') {
+            // Unit conversions: check both operation and factor
+            isCorrect = userAnswer &&
+                        userAnswer.operation === correctAnswer.correctOperation &&
+                        Math.abs(userAnswer.factor - correctAnswer.correctFactor) < 1e-9;
+
+            // Debug logging
+            if (userAnswer) {
+                console.log('Unit conversion check:');
+                console.log('User operation:', JSON.stringify(userAnswer.operation), 'Type:', typeof userAnswer.operation);
+                console.log('Correct operation:', JSON.stringify(correctAnswer.correctOperation), 'Type:', typeof correctAnswer.correctOperation);
+                console.log('User factor:', userAnswer.factor, 'Type:', typeof userAnswer.factor);
+                console.log('Correct factor:', correctAnswer.correctFactor, 'Type:', typeof correctAnswer.correctFactor);
+                console.log('Operation match:', userAnswer.operation === correctAnswer.correctOperation);
+                console.log('Factor match:', Math.abs(userAnswer.factor - correctAnswer.correctFactor) < 1e-9);
+                console.log('Is correct:', isCorrect);
+            }
+        } else if (this.state.currentLevel.key === 'fdpConversions' || this.state.currentLevel.key === 'fdpConversionsMultiples') {
             isCorrect = true;
             for (const key in correctAnswer) {
                 if (key === 'fraction') {
@@ -220,44 +285,128 @@ export class GameController {
             isCorrect = userAnswer === correctAnswer;
         }
 
+        // BRANCH 1: CORRECT ANSWER
         if (isCorrect) {
+            // Reset mistake counter for this question
+            this.state.resetIncorrectCount();
+
+            // Update streak and display
             const newStreak = this.state.incrementStreak();
             this.ui.updateStreak(newStreak);
-            this.ui.showInputFeedback(isCorrect);
+
+            // Visual and auditory feedback
+            this.ui.showInputFeedback(true);
             this.ui.showFeedback(true, CONFIG.POSITIVE_FEEDBACK[Math.floor(Math.random() * CONFIG.POSITIVE_FEEDBACK.length)]);
             this.confetti.trigger(CONFIG.CONFETTI.CORRECT);
-            
+
+            // Check if level is complete or move to next question
             if (this.state.isComplete()) {
                 setTimeout(() => this.showSuccess(), 500);
             } else {
-            setTimeout(() => { 
-                    this.answerSubmitted = false; // Reset flag
-                    this.generateQuestion(); 
-                    this.isChecking = false; 
+                setTimeout(() => {
+                    this.answerSubmitted = false;
+                    this.generateQuestion();
+                    this.isChecking = false;
                 }, CONFIG.FEEDBACK_DELAY_CORRECT);
             }
-        } else {
-            this.state.resetStreak();
-            this.ui.updateStreak(0);
-            this.timer.reset()
-            this.timer.start()
-            this.ui.showInputFeedback(isCorrect);
-            const correctAnswerText = this.ui.formatAnswerForDisplay(correctAnswer, this.state.currentLevel.key);
-			const needsKatex = typeof correctAnswer === 'object' || this.state.currentLevel.key.includes('fdp');
-			this.ui.showFeedback(false, `${correctAnswerText}`, needsKatex);
-            setTimeout(() => { 
-                this.answerSubmitted = false; // Reset flag
-                this.generateQuestion(); 
-                this.isChecking = false; 
-            }, CONFIG.FEEDBACK_DELAY_INCORRECT);
+        }
+        // BRANCH 2: INCORRECT ANSWER
+        else {
+            // Increment consecutive incorrect counter
+            const incorrectCount = this.state.incrementIncorrectCount();
+
+            // SUB-BRANCH: Second Incorrect Attempt (show answer and pause timer)
+            if (this.state.isSecondIncorrectAttempt()) {
+                // Reset streak
+                this.state.resetStreak();
+                this.ui.updateStreak(0);
+
+                // Visual feedback
+                this.ui.showInputFeedback(false);
+
+                // Show correct answer with question context
+                const correctAnswerText = this.ui.formatAnswerForDisplay(correctAnswer, this.state.currentLevel.key);
+                this.ui.showFeedback(false, null, correctAnswerText, this.state.currentQuestion?.problem);
+
+                // Pause timer
+                this.ui.showTimerPausedMessage();
+                this.timer.stop();  // Pause the timer (don't reset, just stop)
+
+                // Record mistake
+                // this.recordMistake(userAnswer, correctAnswer);  // Optional: for progress tracking
+
+                // Clear input
+                this.ui.clearAnswer();
+
+                // Set flag to block normal input while waiting for keystroke
+                this.isWaitingForKeystroke = true;
+                this.isChecking = false;
+
+                // Add a small delay before attaching the listener to prevent the current keystroke from triggering it
+                setTimeout(() => {
+                    // Setup keystroke listener for advancing to next question
+                    const moveToNextQuestion = (e) => {
+                        // Only trigger on valid keys: single printable characters, Enter, Backspace, Delete
+                        // Exclude modifier keys and meta keys
+                        const isValidKey = e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete' ||
+                                          (e.key.length === 1 && !/^(Shift|Control|Alt|Meta|Escape|Tab|CapsLock|F\d+)/.test(e.key));
+
+                        if (isValidKey) {
+                            e.preventDefault();  // Prevent default behavior
+                            e.stopPropagation();  // Stop event from propagating
+
+                            // Remove listener immediately (one-time use)
+                            document.removeEventListener('keydown', moveToNextQuestion);
+
+                            // Reset waiting flag
+                            this.isWaitingForKeystroke = false;
+
+                            // Execute transition sequence
+                            this.ui.hideTimerPausedMessage();
+                            this.answerSubmitted = false;
+                            this.generateQuestion();  // Resets consecutiveIncorrect
+                            this.timer.start();  // Restart timer from 0:00
+                            this.isChecking = false;
+                        }
+                    };
+
+                    // Attach listener
+                    document.addEventListener('keydown', moveToNextQuestion);
+                }, 50);  // 50ms delay to prevent the same keystroke from triggering the listener
+            }
+            // SUB-BRANCH: First Incorrect Attempt (show encouragement and allow retry)
+            else {
+                // Show red input feedback
+                this.ui.showInputFeedback(false);
+
+                // Show encouraging "second chance" message
+                this.ui.showFeedback(false, CONFIG.SECOND_CHANCE_FEEDBACK[
+                    Math.floor(Math.random() * CONFIG.SECOND_CHANCE_FEEDBACK.length)
+                ]);
+
+                // After delay, clear feedback and re-enable input
+                setTimeout(() => {
+                    this.ui.clearFeedback();
+                    this.ui.clearInputFeedback();
+                    this.answerSubmitted = false;
+                    this.isChecking = false;
+
+                    // Refocus input for convenience
+                    const inputs = this.ui.elements.questionText.querySelectorAll('input');
+                    if (inputs.length > 0) {
+                        inputs[0].focus();
+                    }
+                }, CONFIG.FEEDBACK_DELAY_INCORRECT);
+            }
         }
     }
 
 
     quitGame() {
-        this.timer.stop(); 
+        this.timer.stop();
         this.state.reset();
         this.isChecking = false;
+        this.isWaitingForKeystroke = false;
         this.updateLearningPathInterface();
         this.ui.showScreen('settings');
     }
@@ -298,12 +447,12 @@ export class GameController {
         const time = this.timer.getSeconds();
         const previousBest = StorageManager.getBestTime(this.state.currentLevel.key);
         const isNewBest = !previousBest || time < previousBest;
-        
+
         if (isNewBest) {
             StorageManager.saveBestTime(this.state.currentLevel.key, time);
             this.confetti.trigger(CONFIG.CONFETTI.SUCCESS);
         }
-        
+
         // Add progress tracking with better error handling
         try {
             if (window.progressTracker) {
@@ -326,14 +475,22 @@ export class GameController {
         } catch (error) {
             console.error('Error updating mastery progress (non-blocking):', error);
         }
-        
+
         // Show success screen
         try {
-            this.ui.showSuccess(this.state.currentLevel.name, time, rating, isNewBest, previousBest);
+            this.ui.showSuccess(
+                this.state.currentLevel.name,
+                time,
+                rating,
+                isNewBest,
+                previousBest,
+                this.state.currentLevel.key,
+                CONFIG.REQUIRED_STREAK
+            );
         } catch (error) {
             console.error('Error showing success screen:', error);
         }
-        
+
         this.isChecking = false;
     }
 }

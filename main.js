@@ -9,8 +9,8 @@ import { GameController } from './gameController.js';
 // Initialize the application by creating the main game controller
 // This will automatically set up all required subsystems including:
 // - Game state management
-// - UI rendering and event handling  
+// - UI rendering and event handling
 // - Question generation
 // - Progress tracking
 // - Mastery assessment
-new GameController();
+window.gameController = new GameController();
