@@ -29,6 +29,8 @@ export class UI {
             masteryProgressBars: document.getElementById('mastery-progress-bars'),
             toggleGridView: document.getElementById('toggle-grid-view'),
             replayLevelBtn: document.getElementById('replay-level-btn'),
+            ratingExplanation: document.getElementById('rating-explanation'),
+            levelName: document.getElementById('level-name'),
         };
         this.onBackToLevels = null;
         this.questionRenderers = {
@@ -391,6 +393,7 @@ export class UI {
     }
     
     updateStreak(streak) { this.elements.streakCounter.textContent = streak; }
+    updateLevelName(name) { this.elements.levelName.innerHTML = name; }
 
     showFeedback(isCorrect, message, correctAnswer = null, question = null) {
         this.elements.feedbackMessage.innerHTML = '';
@@ -546,7 +549,7 @@ export class UI {
             const nextTarget = RatingUtils.getNextRatingTarget(rating, levelKey, questionCount, CONFIG);
 
             if (nextTarget) {
-                const targetTimeFormatted = new Timer().formatTime(nextTarget.targetTime);
+                const targetTimeFormatted = new Timer().formatTime(Math.round(nextTarget.targetTime * 10) / 10);
                 this.elements.ratingExplanation.textContent =
                     `Complete in ${targetTimeFormatted} or less for ${nextTarget.nextRating.name}.`;
             } else if (rating.key === 'true-mastery') {

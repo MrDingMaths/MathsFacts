@@ -141,6 +141,7 @@ export class GameController {
     startGame(level) {
         this.state.setLevel(level);
         this.ui.showScreen('game');
+        this.ui.updateLevelName(level.name);
         this.ui.updateStreak(0);
         this.isWaitingForKeystroke = false;
         this.timer.start();

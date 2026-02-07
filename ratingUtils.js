@@ -104,4 +104,34 @@ export class RatingUtils {
         const multiplier = config.LEVEL_DIFFICULTY_MULTIPLIERS[levelKey] || config.LEVEL_DIFFICULTY_MULTIPLIERS.default || 1.0;
         return avgTime / multiplier;
     }
+
+    /**
+     * Calculate the target time needed to achieve the next better rating
+     * @param {Object} currentRating - Rating object from getRating() with key property
+     * @param {string} levelKey - Level identifier for difficulty adjustment
+     * @param {number} questionCount - Number of questions in the challenge
+     * @param {Object} config - Configuration object with thresholds and multipliers
+     * @returns {Object|null} { nextRating, targetTime } or null if already at best rating
+     */
+    static getNextRatingTarget(currentRating, levelKey, questionCount, config = null) {
+        if (!config && typeof window !== 'undefined' && window.CONFIG) {
+            config = window.CONFIG;
+        }
+        if (!config || !config.RATING_THRESHOLDS || !currentRating) return null;
+
+        const thresholds = config.RATING_THRESHOLDS;
+        const currentIndex = thresholds.findIndex(r => r.key === currentRating.key);
+
+        // Already at best rating (true-mastery at index 0)
+        if (currentIndex <= 0) return null;
+
+        const nextRating = thresholds[currentIndex - 1];
+        const difficultyMultiplier = (levelKey && config.LEVEL_DIFFICULTY_MULTIPLIERS)
+            ? (config.LEVEL_DIFFICULTY_MULTIPLIERS[levelKey] || config.LEVEL_DIFFICULTY_MULTIPLIERS.default || 1.0)
+            : 1.0;
+
+        // Reverse the rating formula: targetTime = maxAvg * multiplier * questionCount
+        const targetTime = nextRating.maxAvg * difficultyMultiplier * questionCount;
+        return { nextRating, targetTime };
+    }
 }

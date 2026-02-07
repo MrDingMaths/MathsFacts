@@ -15,10 +15,8 @@ export const CONFIG = {
             { key: 'bonds20', name: 'Bonds to 20', value: 20 },
             { key: 'mixed10-20', name: 'Mixed Bonds 10-20', customMixedRange: [10, 20] },
             { key: 'bonds100', name: 'Bonds to 100', value: 100 },
-            { key: 'bonds90', name: 'Bonds to 90', value: 90 },
             { key: 'bonds-10', name: 'Bonds to -10', value: -10 },
             { key: 'bonds-20', name: 'Bonds to -20', value: -20 },
-            { key: 'bonds-50', name: 'Bonds to -50', value: -50 },
         ],
         // Times tables, division facts, and related multiplicative concepts
         "Multiplication & Division": [
@@ -73,31 +71,29 @@ export const CONFIG = {
         'bonds10': 1,           // Very basic, Year 8s should be fast
         'bonds20': 1,           // Still basic
         'mixed10-20': 1.0,        // Mixed requires more thinking
-        'bonds90': 1.6,           // Larger numbers, slightly harder
         'bonds100': 1.2,          // Common benchmark, standard speed
         'bonds-10': 1.5,          // Negative numbers add complexity
         'bonds-20': 1.5,          // More negative complexity
-        'bonds-50': 1.6,          // Larger negative numbers
 
         // Multiplication & Division - essential facts requiring memorization
         'group245': 1,          // Easy tables (2,4,5,10)
-        'group369': 1.0,          // Medium tables (3,6,9)
-        'multall': 1.1,           // Full tables (2-12), more variety
-        'mixed-negative-mult': 1.4, // Negatives add significant complexity
+        'group369': 1,          // Medium tables (3,6,9)
+        'multall': 1,           // Full tables (2-12), more variety
+        'mixed-negative-mult': 1.5, // Negatives add significant complexity
         'powersOf10': 2,        // Pattern-based, should be quick
-        'double100': 1.2,         // Doubling is systematic
+        'double100': 1.5,         // Doubling is systematic
         'squares': 1,           // Need memorization but predictable
-        'unitConversions': 4,   // Requires knowledge + calculation
+        'unitConversions': 5,   // Requires knowledge + calculation
 
         // Fractions Decimals Percentages - complex multi-step calculations
         'hcf': 1.5,               // Requires factorization
         'lcm': 2,               // Requires multiples
-        'equivFractions': 1.5,    // Two inputs but straightforward concept
-        'simplifyFractions': 2.5, // Two inputs, division/factoring
+        'equivFractions': 1.8,    // Two inputs but straightforward concept
+        'simplifyFractions': 2.8, // Two inputs, division/factoring
         'fdpConversions': 2,    // Multiple inputs (3-4 fields), complex
-        'fdpConversionsMultiples': 2.2, // Even more complex calculations
-        'fractionOfQuantity': 1.8, // Multiplication + fractions
-        'percentageOfQuantity': 1.8, // Percentage calculations
+        'fdpConversionsMultiples': 2.5, // Even more complex calculations
+        'fractionOfQuantity': 2, // Multiplication + fractions
+        'percentageOfQuantity': 2, // Percentage calculations
 
         // Fallback multiplier for any levels not explicitly configured
         'default': 1.0
