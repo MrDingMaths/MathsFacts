@@ -141,6 +141,7 @@ export class GameController {
     startGame(level) {
         this.state.setLevel(level);
         this.ui.showScreen('game');
+        this.ui.updateLevelName(level.name);
         this.ui.updateStreak(0);
         this.isWaitingForKeystroke = false;
         this.timer.start();
@@ -346,6 +347,15 @@ export class GameController {
                 setTimeout(() => {
                     // Setup keystroke listener for advancing to next question
                     const moveToNextQuestion = (e) => {
+                        // Handle Escape specially - clear the listener but let normal Escape handler run
+                        if (e.key === 'Escape') {
+                            document.removeEventListener('keydown', moveToNextQuestion);
+                            this.isWaitingForKeystroke = false;
+                            this.ui.hideTimerPausedMessage();
+                            // Don't preventDefault - let Escape handler quit the game
+                            return;
+                        }
+
                         // Only trigger on valid keys: single printable characters, Enter, Backspace, Delete
                         // Exclude modifier keys and meta keys
                         const isValidKey = e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Delete' ||

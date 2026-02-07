@@ -8,7 +8,7 @@ export class MasteryTracker {
         this.TOPIC_GROUPS = {
             'Number Bonds': {
                 name: 'Number Bonds Mastery',
-                levels: ['bonds10', 'bonds20', 'mixed10-20', 'bonds90', 'bonds100', 'bonds-10', 'bonds-20', 'bonds-50'],
+                levels: ['bonds10', 'bonds20', 'mixed10-20', 'bonds100', 'bonds-10', 'bonds-20'],
                 color: '#34d399'
             },
             'Multiplication & Division': {
