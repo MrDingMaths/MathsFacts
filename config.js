@@ -40,7 +40,7 @@ export const CONFIG = {
             { key: 'fdpConversionsMultiples', name: 'FDP Conversions' },
             { key: 'fractionOfQuantity', name: 'Fraction of a Quantity' },
             { key: 'percentageOfQuantity', name: 'Percentage of a Quantity' },
-            { key: 'increaseDecreasePercentage', name: 'Increase and Decrease by Percentage' },
+            { key: 'increaseDecreasePercentage', name: 'Increase Decrease by Percentage' },
         ]
     },
     // Number of consecutive correct answers required to complete a level
@@ -97,7 +97,7 @@ export const CONFIG = {
         'fdpConversionsMultiples': 2.5, // Even more complex calculations
         'fractionOfQuantity': 2, // Multiplication + fractions
         'percentageOfQuantity': 2, // Percentage calculations
-        'increaseDecreasePercentage': 2.0, // Increase/decrease operations with percentage of questions
+        'increaseDecreasePercentage': 2.5, // Increase/decrease operations with percentage of questions
 
         // Fallback multiplier for any levels not explicitly configured
         'default': 1.0
