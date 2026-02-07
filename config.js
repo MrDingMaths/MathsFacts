@@ -43,6 +43,54 @@ export const CONFIG = {
             { key: 'increaseDecreasePercentage', name: 'Increase Decrease by Percentage' },
         ]
     },
+
+    /**
+     * Custom abbreviations for skill path display
+     * Maps level names to short display format with optional KaTeX rendering
+     * Used to create compact node labels in the skill path visualization
+     */
+    LEVEL_ABBREVIATIONS: {
+        // Number Bonds
+        'Bonds to 10': { text: '10', useKaTeX: false },
+        'Bonds to 20': { text: '20', useKaTeX: false },
+        'Mixed Bonds 10-20': { text: '10-20', useKaTeX: false },
+        'Bonds to 100': { text: '100', useKaTeX: false },
+        'Bonds to -10': { text: '-10', useKaTeX: false },
+        'Bonds to -20': { text: '-20', useKaTeX: false },
+
+        // Multiplication & Division
+        '× 2 4 5 10': { text: '\\times 2', useKaTeX: true },
+        '× 3 6 9': { text: '\\times 3', useKaTeX: true },
+        '× 2 to 12': { text: '\\times 12', useKaTeX: true },
+        '× Negatives': { text: '\\times -', useKaTeX: true },
+        '×÷ 100': { text: '\\times 100', useKaTeX: true },
+        '×÷ Powers of 10': { text: '10^n', useKaTeX: true },
+        'Doubling': { text: '\\times 2', useKaTeX: true },
+        'Perfect Squares': { text: 'n^2', useKaTeX: true },
+        'Unit Conversions': { text: 'mm→cm', useKaTeX: false },
+
+        // Fractions Decimals Percentages
+        'HCF': { text: 'HCF', useKaTeX: false },
+        'LCM': { text: 'LCM', useKaTeX: false },
+        'Equivalent Fractions': { text: '\\frac{a}{b} = \\frac{an}{bn}', useKaTeX: true },
+        'Simplifying Fractions': { text: '\\frac{\\div n}{\\div n}', useKaTeX: true },
+        'Common FDP Equivalences': { text: '\\frac{1}{2} = 0.5', useKaTeX: true },
+        'FDP Conversions': { text: '\\frac{a}{b} \\leftrightarrow \\%', useKaTeX: true },
+        'Fraction of a Quantity': { text: '\\frac{1}{2} \\times n', useKaTeX: true },
+        'Percentage of a Quantity': { text: '\\% \\times n', useKaTeX: true },
+        'Increase Decrease by Percentage': { text: '\\% \\pm', useKaTeX: true }
+    },
+
+    /**
+     * Category mappings for progress tracking filters
+     * Maps group names to category identifiers for drill filtering in progress UI
+     */
+    CATEGORY_MAP: {
+        'Number Bonds': 'bonds',
+        'Multiplication & Division': 'multiplication',
+        'Fractions Decimals Percentages': 'fractions'
+    },
+
     // Number of consecutive correct answers required to complete a level
     REQUIRED_STREAK: 15,
     // UI timing delays in milliseconds

@@ -5,6 +5,7 @@
  */
 import { createEl } from './utils.js';
 import { Timer, StorageManager } from './gameState.js';
+import * as ConfigUtils from './configUtils.js';
 
 export class UI {
     constructor() {
@@ -743,35 +744,8 @@ export class UI {
     }
 
     getLevelAbbreviation(levelName) {
-        // Create short abbreviations for level names with KaTeX support
-        const abbreviations = {
-            'Bonds to 10': { text: '10', useKaTeX: false },
-            'Bonds to 20': { text: '20', useKaTeX: false },
-            'Mixed Bonds 10-20': { text: '10-20', useKaTeX: false },
-            'Bonds to 90': { text: '90', useKaTeX: false },
-            'Bonds to 100': { text: '100', useKaTeX: false },
-            'Bonds to -10': { text: '-10', useKaTeX: false },
-            'Bonds to -20': { text: '-20', useKaTeX: false },
-            'Bonds to -50': { text: '-50', useKaTeX: false },
-            '2 4 5 10': { text: '\\times 2', useKaTeX: true },
-            '3 6 9': { text: '\\times 3', useKaTeX: true },
-            '2 to 12': { text: '\\times 12', useKaTeX: true },
-            'Negatives': { text: '\\times -', useKaTeX: true },
-            'Powers of 10': { text: '10^n', useKaTeX: true },
-            'Doubling': { text: '\\times 2', useKaTeX: true },
-            'Perfect Squares': { text: 'n^2', useKaTeX: true },
-            'Unit Conversions': { text: 'mm→cm', useKaTeX: false },
-            'HCF': { text: 'HCF', useKaTeX: false },
-            'LCM': { text: 'LCM', useKaTeX: false },
-            'Equivalent Fractions': { text: '\\frac{a}{b} = \\frac{an}{bn}', useKaTeX: true },
-            'Simplifying Fractions': { text: '\\frac{\\div n}{\\div n}', useKaTeX: true },
-            'Common FDP Equivalences': { text: '\\frac{1}{2} = 0.5', useKaTeX: true },
-            'FDP Conversions': { text: '\\frac{a}{b} \\leftrightarrow \\%', useKaTeX: true },
-            'Fraction of a Quantity': { text: '\\frac{1}{2} \\times n', useKaTeX: true },
-            'Percentage of a Quantity': { text: '\\% \\times n', useKaTeX: true }
-        };
-        
-        return abbreviations[levelName] || { text: levelName.charAt(0), useKaTeX: false };
+        // Use ConfigUtils to get abbreviations from centralized CONFIG.LEVEL_ABBREVIATIONS
+        return ConfigUtils.getLevelAbbreviation(levelName);
     }
 
     setLevelAbbreviation(element, levelName) {

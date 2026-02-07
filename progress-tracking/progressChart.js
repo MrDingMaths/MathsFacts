@@ -379,7 +379,13 @@ class ProgressChart {
 
     // Helper to get level name from key
     getLevelNameFromKey(key) {
-        // This should match your CONFIG.LEVEL_GROUPS structure
+        // Use global ConfigUtils if available (dynamically builds from CONFIG.LEVEL_GROUPS)
+        if (window.ConfigUtils) {
+            return window.ConfigUtils.getLevelNameFromKey(key);
+        }
+
+        // TEMPORARY FALLBACK for safety during migration
+        // Can be removed after testing confirms ConfigUtils works
         const levelMap = {
             'bonds10': 'Bonds to 10',
             'bonds20': 'Bonds to 20',

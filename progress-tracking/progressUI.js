@@ -346,6 +346,13 @@ class ProgressUI {
     
     // Get drill category for filtering
     getDrillCategory(key) {
+        // Use global ConfigUtils if available (dynamically builds from CONFIG.CATEGORY_MAP)
+        if (window.ConfigUtils) {
+            return window.ConfigUtils.getDrillCategory(key);
+        }
+
+        // TEMPORARY FALLBACK for safety during migration
+        // Can be removed after testing confirms ConfigUtils works
         const categoryMap = {
             'bonds10': 'bonds',
             'bonds20': 'bonds',
