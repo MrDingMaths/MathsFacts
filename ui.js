@@ -5,7 +5,6 @@
  */
 import { createEl } from './utils.js';
 import { Timer, StorageManager } from './gameState.js';
-import * as ConfigUtils from './configUtils.js';
 
 export class UI {
     constructor() {
@@ -741,31 +740,6 @@ export class UI {
 
         node.append(label, timeDisplay);
         return node;
-    }
-
-    getLevelAbbreviation(levelName) {
-        // Use ConfigUtils to get abbreviations from centralized CONFIG.LEVEL_ABBREVIATIONS
-        return ConfigUtils.getLevelAbbreviation(levelName);
-    }
-
-    setLevelAbbreviation(element, levelName) {
-        const abbrev = this.getLevelAbbreviation(levelName);
-        
-        if (abbrev.useKaTeX) {
-            try {
-                katex.render(abbrev.text, element, { 
-                    throwOnError: false,
-                    displayMode: false,
-                    output: 'html'
-                });
-            } catch (error) {
-                // KaTeX rendering failed - fall back to plain text without LaTeX syntax
-                console.warn('KaTeX rendering failed for abbreviation:', abbrev.text, error);
-                element.textContent = abbrev.text.replace(/\\\\/g, '').replace(/\{|\}/g, '');
-            }
-        } else {
-            element.textContent = abbrev.text;
-        }
     }
 
     scrollToNextLevel(levelIndex) {

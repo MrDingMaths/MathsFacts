@@ -263,10 +263,6 @@ class ProgressUI {
         setTimeout(() => {
             if (view === 'drills') {
                 this.initializeDrillChart();
-                // Re-attach event listeners for filter buttons if they're dynamic
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => this.filterByCategory(e.target.dataset.category));
-                });
             }
         }, 100);
     }
@@ -380,16 +376,6 @@ class ProgressUI {
         return categoryMap[key] || 'other';
     }
     
-    // Get drill icon based on category
-    getDrillIcon(category) {
-        const icons = {
-            'bonds': '🔗',
-            'multiplication': '✖️',
-            'fractions': '➗',
-            'other': '📝'
-        };
-        return icons[category] || '📝';
-    }
     
     // Get performance rating - uses shared rating utility for consistency
     getPerformanceRating(averageTime, levelKey = null) {
@@ -535,14 +521,9 @@ class ProgressUI {
         }
         
         console.log('Showing progress for:', levelKey);
-        
-        // Update chart title
+
         const levelName = this.progressChart.getLevelNameFromKey(levelKey);
-        const titleElement = document.getElementById('current-drill-title');
-        if (titleElement) {
-            titleElement.textContent = `Progress: ${levelName}`;
-        }
-        
+
         // Ensure canvas is ready
         this.initializeDrillChart();
         
@@ -558,13 +539,6 @@ class ProgressUI {
         const drill = this.progressTracker.getDrillProgress(levelKey);
         if (drill) {
             const rating = this.getPerformanceRating(drill.averageTime, levelKey);
-
-            // Calculate cumulative improvement percentage
-            let cumulativeImprovement = '—';
-            if (drill.firstAttemptTime && drill.bestTime && drill.firstAttemptTime > drill.bestTime) {
-                const improvement = ((drill.firstAttemptTime - drill.bestTime) / drill.firstAttemptTime * 100);
-                cumulativeImprovement = improvement.toFixed(1) + '%';
-            }
 
             const statsHtml = `
                 <div class="stats-header">
@@ -664,17 +638,6 @@ class ProgressUI {
         });
 
         console.log(`Cleared ${keys.length} best time records`);
-    }
-
-    // Helper function to create elements (same as ui.js)
-    _createEl(tag, options = {}) {
-        const el = document.createElement(tag);
-        if (options.className) el.className = options.className;
-        if (options.id) el.id = options.id;
-        if (options.style) Object.assign(el.style, options.style);
-        if (options.type) el.type = options.type;
-        if (options.title) el.title = options.title;
-        return el;
     }
 
 }
