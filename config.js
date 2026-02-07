@@ -20,11 +20,12 @@ export const CONFIG = {
         ],
         // Times tables, division facts, and related multiplicative concepts
         "Multiplication & Division": [
-            { key: 'group245', name: '2 4 5 10' },
-            { key: 'group369', name: '3 6 9' },
-            { key: 'multall', name: '2 to 12' },
-            { key: 'mixed-negative-mult', name: 'Negatives' },
-            { key: 'powersOf10', name: 'Powers of 10' },
+            { key: 'group245', name: '× 2 4 5 10' },
+            { key: 'group369', name: '× 3 6 9' },
+            { key: 'multall', name: '× 2 to 12' },
+            { key: 'mixed-negative-mult', name: '× Negatives' },
+            { key: 'multiplyDivideBy100', name: '×÷ 100' },
+            { key: 'powersOf10', name: '×÷ Powers of 10' },
             { key: 'double100', name: 'Doubling' },
             { key: 'squares', name: 'Perfect Squares' },
             { key: 'unitConversions', name: 'Unit Conversions' },
@@ -39,6 +40,7 @@ export const CONFIG = {
             { key: 'fdpConversionsMultiples', name: 'FDP Conversions' },
             { key: 'fractionOfQuantity', name: 'Fraction of a Quantity' },
             { key: 'percentageOfQuantity', name: 'Percentage of a Quantity' },
+            { key: 'increaseDecreasePercentage', name: 'Increase and Decrease by Percentage' },
         ]
     },
     // Number of consecutive correct answers required to complete a level
@@ -80,6 +82,7 @@ export const CONFIG = {
         'group369': 1,          // Medium tables (3,6,9)
         'multall': 1,           // Full tables (2-12), more variety
         'mixed-negative-mult': 1.5, // Negatives add significant complexity
+        'multiplyDivideBy100': 1.5, // Focused on single power, pattern-based
         'powersOf10': 2,        // Pattern-based, should be quick
         'double100': 1.5,         // Doubling is systematic
         'squares': 1,           // Need memorization but predictable
@@ -94,6 +97,7 @@ export const CONFIG = {
         'fdpConversionsMultiples': 2.5, // Even more complex calculations
         'fractionOfQuantity': 2, // Multiplication + fractions
         'percentageOfQuantity': 2, // Percentage calculations
+        'increaseDecreasePercentage': 2.0, // Increase/decrease operations with percentage of questions
 
         // Fallback multiplier for any levels not explicitly configured
         'default': 1.0

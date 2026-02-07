@@ -23,6 +23,22 @@ export function generatePerfectSquares(inputPlaceholder) {
 export function generatePowersOf10(inputPlaceholder) {
     const power = [10, 100, 1000][Math.floor(Math.random() * 3)];
     const isMultiplication = Math.random() < 0.5;
+    const num = (Math.floor(Math.random() * 99) + 1) / ([1, 10, 100, 1000][Math.floor(Math.random() * 5)]);
+    if (isMultiplication) {
+        return { format: `${num} \\times ${power} = ${inputPlaceholder}`, answer: parseFloat((num * power).toPrecision(15)) };
+    } else {
+        return { format: `${num} \\div ${power} = ${inputPlaceholder}`, answer: parseFloat((num / power).toPrecision(15)) };
+    }
+}
+
+/**
+ * Generate multiplication/division by 100 questions only
+ * Simplified version of powersOf10 focused on a single power
+ * @returns {Object} Question object for multiply/divide by 100
+ */
+export function generateMultiplyDivideBy100(inputPlaceholder) {
+    const power = 100;
+    const isMultiplication = Math.random() < 0.5;
     const num = (Math.floor(Math.random() * 999) + 1) / ([1, 10, 100, 1000, 10000][Math.floor(Math.random() * 5)]);
     if (isMultiplication) {
         return { format: `${num} \\times ${power} = ${inputPlaceholder}`, answer: parseFloat((num * power).toPrecision(15)) };

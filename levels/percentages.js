@@ -52,3 +52,61 @@ export function generatePercentageOfQuantity(inputPlaceholder) {
         answer: answer
     };
 }
+
+/**
+ * Generate "increase/decrease by percentage" questions with mixed percentage-of questions
+ * Includes: "increase X by Y%", "decrease X by Y%", and "Y% of X" questions
+ * @returns {Object} Question object for percentage increase/decrease operations
+ */
+export function generateIncreaseDecreasePercentage(inputPlaceholder) {
+    // Define percentages suitable for increase/decrease operations
+    const percentageData = {
+        5: [20, 40, 60, 80, 100, 200, 400, 600, 1000],
+        10: [10, 20, 30, 50, 80, 100, 150, 200, 500, 1000],
+        15: [20, 40, 60, 80, 100, 120, 200, 400],
+        20: [5, 10, 15, 20, 25, 50, 100, 150, 200, 300],
+        25: [4, 8, 12, 16, 20, 40, 60, 80, 100, 200, 400],
+        30: [10, 20, 30, 40, 50, 100, 120, 200, 300, 500],
+        40: [5, 10, 15, 20, 25, 50, 100, 150, 200, 500],
+        50: [2, 4, 10, 12, 20, 30, 50, 80, 100, 150, 200]
+    };
+
+    // Determine question type: 40% increase, 40% decrease, 20% standard percentage
+    const rand = Math.random();
+
+    // Choose a percentage
+    const percentages = Object.keys(percentageData).map(Number);
+    const percentage = percentages[Math.floor(Math.random() * percentages.length)];
+
+    // Choose a quantity that will give a whole number result
+    const availableQuantities = percentageData[percentage];
+    const originalQuantity = availableQuantities[Math.floor(Math.random() * availableQuantities.length)];
+
+    if (rand < 0.4) {
+        // INCREASE by percentage
+        const change = Math.round(percentage * originalQuantity / 100);
+        const finalAmount = originalQuantity + change;
+        const questionFormat = `\\text{increase } ${originalQuantity} \\text{ by } ${percentage}\\% = ${inputPlaceholder}`;
+        return {
+            format: questionFormat,
+            answer: finalAmount
+        };
+    } else if (rand < 0.8) {
+        // DECREASE by percentage
+        const change = Math.round(percentage * originalQuantity / 100);
+        const finalAmount = originalQuantity - change;
+        const questionFormat = `\\text{decrease } ${originalQuantity} \\text{ by } ${percentage}\\% = ${inputPlaceholder}`;
+        return {
+            format: questionFormat,
+            answer: finalAmount
+        };
+    } else {
+        // STANDARD percentage of quantity (like percentageOfQuantity)
+        const answer = Math.round(percentage * originalQuantity / 100);
+        const questionFormat = `${percentage}\\% \\text{ of } ${originalQuantity} = ${inputPlaceholder}`;
+        return {
+            format: questionFormat,
+            answer: answer
+        };
+    }
+}

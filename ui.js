@@ -151,7 +151,7 @@ export class UI {
         }
 
         const inputOptions = { type: 'number', className: 'inline-input', step: 'any', autocomplete: 'off' };
-        if (levelKey === 'powersOf10' || levelKey === 'unitConversions') {
+        if (levelKey === 'powersOf10' || levelKey === 'unitConversions' || levelKey === 'multiplyDivideBy100') {
             inputOptions.style = { width: '12rem' }; // Increased width for this level
         }
         const inputEl = createEl('input', inputOptions);

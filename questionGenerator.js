@@ -66,6 +66,14 @@ export class QuestionGenerator {
         return levels.generatePercentageOfQuantity(this.inputPlaceholder);
     }
 
+    /**
+     * Generate "increase/decrease by percentage" questions
+     * @returns {Object} Question object for percentage increase/decrease operations
+     */
+    generateIncreaseDecreasePercentage() {
+        return levels.generateIncreaseDecreasePercentage(this.inputPlaceholder);
+    }
+
     // ========== FACTOR METHODS ==========
 
     /**
@@ -150,6 +158,14 @@ export class QuestionGenerator {
      */
     generatePowersOf10() {
         return levels.generatePowersOf10(this.inputPlaceholder);
+    }
+
+    /**
+     * Generate multiplication/division by 100 questions
+     * @returns {Object} Question object for multiply/divide by 100
+     */
+    generateMultiplyDivideBy100() {
+        return levels.generateMultiplyDivideBy100(this.inputPlaceholder);
     }
 
     // ========== UNIT CONVERSION METHODS ==========

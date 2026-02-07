@@ -10,7 +10,7 @@ export {
     generateSimplifyFractions,
     generateFractionOfQuantity
 } from './fractionDecimals.js';
-export { generatePercentageOfQuantity } from './percentages.js';
+export { generatePercentageOfQuantity, generateIncreaseDecreasePercentage } from './percentages.js';
 export { generateHCF, generateLCM } from './factors.js';
 export {
     generateSingleTableFacts,
@@ -19,5 +19,5 @@ export {
     generateDoubling
 } from './multiplication.js';
 export { generateBonds } from './numberBonds.js';
-export { generatePerfectSquares, generatePowersOf10 } from './powers.js';
+export { generatePerfectSquares, generatePowersOf10, generateMultiplyDivideBy100 } from './powers.js';
 export { generateUnitConversions } from './unitConversions.js';
